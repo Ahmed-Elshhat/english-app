@@ -1,0 +1,231 @@
+.Plans {
+  background-color: #161a26;
+  min-height: 100vh;
+  color: #fff;
+
+  > h2 {
+    background: linear-gradient(135deg, #00c896, #0d89f2, #0044ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-align: center;
+    margin: 80px 0 0;
+    font-size: 50px;
+    font-weight: bold;
+  }
+
+  .plans_container {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 30px;
+    flex-wrap: wrap;
+    padding: 0 20px;
+    margin-top: 100px;
+  }
+
+  .plan_card {
+    background: #1f2433;
+    border-radius: 20px;
+    padding: 30px 25px;
+    text-align: center;
+    flex: 1 1 280px;
+    max-width: 350px;
+    min-width: 310;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 0 20px #00c896, 0 0 25px #0d89f2;
+    }
+
+    .icon {
+      font-size: 80px;
+      color: #03b7ab;
+      margin-bottom: 15px;
+    }
+
+    h2 {
+      font-size: 30px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .price {
+      color: #0d89f2;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    button {
+      background-color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      -webkit-transition: all 0.3s ease-in-out;
+      -moz-transition: all 0.3s ease-in-out;
+      -ms-transition: all 0.3s ease-in-out;
+      -o-transition: all 0.3s ease-in-out;
+      margin: 10px 0 40px;
+      border-radius: 10px;
+      -webkit-border-radius: 10px;
+      -moz-border-radius: 10px;
+      -ms-border-radius: 10px;
+      -o-border-radius: 10px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0 25px;
+
+      li {
+        margin: 10px 0;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        svg {
+          fill: rgb(1, 157, 1);
+        }
+      }
+    }
+  }
+
+  .featured {
+    background: linear-gradient(135deg, #0d89f2, #00c896);
+    color: #fff;
+    margin-top: -30px;
+    @media (max-width: 1029px) {
+      margin-top: 0;
+    }
+
+    .icon {
+      svg {
+        fill: #fffafa;
+        animation: spin 5s linear infinite, colorShift 3s linear infinite;
+        transform-origin: center;
+      }
+    }
+
+    .price {
+      color: #fff;
+    }
+
+    h2 {
+      color: #161a26;
+    }
+
+    button {
+      color: white;
+      background: linear-gradient(135deg, #050505, #0d89f2, #0044ff);
+      &:hover {
+        box-shadow: 0 0 20px #050505, 0 0 25px #135187;
+        transform: scale(1.1);
+        -webkit-transform: scale(1.1);
+        -moz-transform: scale(1.1);
+        -ms-transform: scale(1.1);
+        -o-transform: scale(1.1);
+      }
+    }
+
+    ul {
+      li {
+        svg {
+          fill: white;
+        }
+      }
+    }
+  }
+
+  .points {
+    .icon {
+      svg {
+        animation: alarmShake 0.25s linear infinite,
+          colorShift 3s linear infinite;
+        transform-origin: center;
+      }
+    }
+  }
+
+  .premium {
+    .icon {
+      .cover {
+        animation: spin 5s linear infinite;
+        transform-origin: center;
+        svg {
+          animation: colorShift 3s linear infinite;
+          transform-origin: center;
+        }
+      }
+    }
+  }
+
+  .points,
+  .premium {
+    button {
+      color: white;
+      background: linear-gradient(135deg, #00c896, #0d89f2, #0044ff);
+      &:hover {
+        box-shadow: 0 0 20px #00c896, 0 0 25px #0d89f2;
+        transform: scale(1.1);
+        -webkit-transform: scale(1.1);
+        -moz-transform: scale(1.1);
+        -ms-transform: scale(1.1);
+        -o-transform: scale(1.1);
+      }
+    }
+  }
+
+  // Animation
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes alarmShake {
+    0% {
+      transform: rotate(0deg);
+    }
+    20% {
+      transform: rotate(15deg);
+    }
+    40% {
+      transform: rotate(-15deg);
+    }
+    60% {
+      transform: rotate(12deg);
+    }
+    80% {
+      transform: rotate(-12deg);
+    }
+    100% {
+      transform: rotate(0deg);
+    }
+  }
+
+  @keyframes colorShift {
+    0% {
+      fill: #0d89f2;
+    }
+    33% {
+      fill: #00c896;
+    }
+    66% {
+      fill: #0044ff;
+    }
+    100% {
+      fill: #0d89f2;
+    }
+  }
+}

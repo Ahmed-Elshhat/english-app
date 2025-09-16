@@ -1,0 +1,368 @@
+[
+  {
+    "_id": "680a4196e5ba39954c341d33",
+    "titleEn": "ahmedahmedahmedahmedahmedahmed(Cart Test)",
+    "titleAr": "احمداحمداحمداحمداحمداحمداحمداحمداحمداحمد(Cart Test)",
+    "descriptionEn": "descriptionEndescriptionEndescriptionEn",
+    "descriptionAr": "descriptionArdescriptionArdescriptionAr",
+    "quantity": 10,
+    "sold": 0,
+    "price": 20,
+    "sizes": [
+      {
+        "size": "s",
+        "quantity": 0,
+        "price": 20,
+        "_id": "680a4196e5ba39954c341d34",
+        "colors": [],
+        "id": "680a4196e5ba39954c341d34"
+      },
+      {
+        "size": "m",
+        "quantity": 5,
+        "price": 20,
+        "colors": [
+          {
+            "color": "#ff5c34",
+            "quantity": 2,
+            "_id": "680a4196e5ba39954c341d36",
+            "id": "680a4196e5ba39954c341d36"
+          },
+          {
+            "color": "#ff5c34",
+            "quantity": 3,
+            "_id": "680a4196e5ba39954c341d37",
+            "id": "680a4196e5ba39954c341d37"
+          }
+        ],
+        "_id": "680a4196e5ba39954c341d35",
+        "id": "680a4196e5ba39954c341d35"
+      },
+      {
+        "size": "l",
+        "quantity": 10,
+        "price": 20,
+        "_id": "680a4196e5ba39954c341d38",
+        "colors": [],
+        "id": "680a4196e5ba39954c341d38"
+      },
+      {
+        "size": "xl",
+        "quantity": 10,
+        "price": 20,
+        "priceAfterDiscount": 5,
+        "_id": "680a4196e5ba39954c341d39",
+        "colors": [],
+        "id": "680a4196e5ba39954c341d39"
+      }
+    ],
+    "coverImage": "product-574c7885-c951-4eb8-a1ff-bd506f046bf9-1745502613318-cover.jpeg",
+    "images": [
+      {
+        "url": "product-0c0e74b5-654c-485c-9e16-9f2d189e7de1-1745502613450-3.jpeg",
+        "_id": "680a4196e5ba39954c341d3a",
+        "id": "680a4196e5ba39954c341d3a"
+      },
+      {
+        "url": "product-d47991f2-b907-4c05-accc-5d64304b40e3-1745502613451-5.jpeg",
+        "_id": "680a4196e5ba39954c341d3b",
+        "id": "680a4196e5ba39954c341d3b"
+      },
+      {
+        "url": "product-871ca3c6-f428-4cb1-925e-d3c11f85ebdb-1745502613448-1.jpeg",
+        "_id": "680a4196e5ba39954c341d3c",
+        "id": "680a4196e5ba39954c341d3c"
+      },
+      {
+        "url": "product-b686c7aa-a302-45ee-9dc9-189e6e965688-1745502613449-2.jpeg",
+        "_id": "680a4196e5ba39954c341d3d",
+        "id": "680a4196e5ba39954c341d3d"
+      },
+      {
+        "url": "product-7e154098-a691-4a9d-a1cf-ee57e9afbe6b-1745502613450-4.jpeg",
+        "_id": "680a4196e5ba39954c341d3e",
+        "id": "680a4196e5ba39954c341d3e"
+      }
+    ],
+    "category": "680a2c23662d9661df208862",
+    "ratingsQuantity": 0,
+    "colors": [],
+    "createdAt": "2025-04-24T13:50:14.105Z",
+    "updatedAt": "2025-04-24T13:50:14.105Z",
+    "reviews": [],
+    "id": "680a4196e5ba39954c341d33"
+  },
+  {
+    "_id": "680a3ead2e806910110d0e8e",
+    "titleEn": "ahmedahmedahmedahmedahmedahmed(Cart Test)",
+    "titleAr": "احمداحمداحمداحمداحمداحمداحمداحمداحمداحمد(Cart Test)",
+    "descriptionEn": "descriptionEndescriptionEndescriptionEn",
+    "descriptionAr": "descriptionArdescriptionArdescriptionAr",
+    "quantity": 0,
+    "sold": 0,
+    "price": 20,
+    "sizes": [
+      {
+        "size": "s",
+        "quantity": 0,
+        "price": 20,
+        "_id": "680a3ead2e806910110d0e8f",
+        "colors": [],
+        "id": "680a3ead2e806910110d0e8f"
+      },
+      {
+        "size": "m",
+        "quantity": 5,
+        "price": 20,
+        "colors": [
+          {
+            "color": "#ff5c34",
+            "quantity": 2,
+            "_id": "680a3ead2e806910110d0e91",
+            "id": "680a3ead2e806910110d0e91"
+          },
+          {
+            "color": "#ff5c34",
+            "quantity": 3,
+            "_id": "680a3ead2e806910110d0e92",
+            "id": "680a3ead2e806910110d0e92"
+          }
+        ],
+        "_id": "680a3ead2e806910110d0e90",
+        "id": "680a3ead2e806910110d0e90"
+      },
+      {
+        "size": "l",
+        "quantity": 10,
+        "price": 20,
+        "_id": "680a3ead2e806910110d0e93",
+        "colors": [],
+        "id": "680a3ead2e806910110d0e93"
+      },
+      {
+        "size": "xl",
+        "quantity": 10,
+        "price": 20,
+        "priceAfterDiscount": 5,
+        "_id": "680a3ead2e806910110d0e94",
+        "colors": [],
+        "id": "680a3ead2e806910110d0e94"
+      }
+    ],
+    "coverImage": "product-913c4c01-f352-42f8-a3f5-abe5422c143a-1745501868291-cover.jpeg",
+    "images": [
+      {
+        "url": "product-816f5ba0-8431-4ab2-ba8b-690914640ed5-1745501868450-1.jpeg",
+        "_id": "680a3ead2e806910110d0e95",
+        "id": "680a3ead2e806910110d0e95"
+      },
+      {
+        "url": "product-022ca90c-bc2d-4622-8cf9-4be6c5a8109e-1745501868452-3.jpeg",
+        "_id": "680a3ead2e806910110d0e96",
+        "id": "680a3ead2e806910110d0e96"
+      },
+      {
+        "url": "product-6d2ff3a7-e72f-4389-9ea8-3826c187f662-1745501868451-2.jpeg",
+        "_id": "680a3ead2e806910110d0e97",
+        "id": "680a3ead2e806910110d0e97"
+      },
+      {
+        "url": "product-7440356d-beef-4ab1-8ea5-aa4f2ff58141-1745501868452-5.jpeg",
+        "_id": "680a3ead2e806910110d0e98",
+        "id": "680a3ead2e806910110d0e98"
+      },
+      {
+        "url": "product-df578845-a865-4dce-ae91-76c8cecec9fc-1745501868452-4.jpeg",
+        "_id": "680a3ead2e806910110d0e99",
+        "id": "680a3ead2e806910110d0e99"
+      }
+    ],
+    "category": "680a2c23662d9661df208862",
+    "ratingsQuantity": 0,
+    "colors": [],
+    "createdAt": "2025-04-24T13:37:49.186Z",
+    "updatedAt": "2025-04-24T13:37:49.186Z",
+    "reviews": [],
+    "id": "680a3ead2e806910110d0e8e"
+  },
+  {
+    "_id": "680a39f0e4b05039ea2f27d1",
+    "titleEn": "Scenario 1 - Sizes with Colors(Cart Test)",
+    "titleAr": "السيناريو 1 - المقاسات مع الألوان (Cart Test)",
+    "descriptionEn": "Product with sizes and each size has its own colors.",
+    "descriptionAr": "منتج يحتوي على مقاسات، ولكل مقاس ألوانه الخاصة.",
+    "quantity": 100,
+    "sold": 0,
+    "price": 500,
+    "colors": [],
+    "sizes": [
+      {
+        "size": "M",
+        "quantity": 10,
+        "price": 500,
+        "priceAfterDiscount": 450,
+        "colors": [
+          {
+            "color": "red",
+            "quantity": 5,
+            "_id": "680a39f0e4b05039ea2f27d3",
+            "id": "680a39f0e4b05039ea2f27d3"
+          },
+          {
+            "color": "blue",
+            "quantity": 5,
+            "_id": "680a39f0e4b05039ea2f27d4",
+            "id": "680a39f0e4b05039ea2f27d4"
+          }
+        ],
+        "_id": "680a39f0e4b05039ea2f27d2",
+        "id": "680a39f0e4b05039ea2f27d2"
+      },
+      {
+        "size": "L",
+        "quantity": 10,
+        "price": 500,
+        "colors": [
+          {
+            "color": "green",
+            "quantity": 5,
+            "_id": "680a39f0e4b05039ea2f27d6",
+            "id": "680a39f0e4b05039ea2f27d6"
+          },
+          {
+            "color": "yellow",
+            "quantity": 5,
+            "_id": "680a39f0e4b05039ea2f27d7",
+            "id": "680a39f0e4b05039ea2f27d7"
+          }
+        ],
+        "_id": "680a39f0e4b05039ea2f27d5",
+        "id": "680a39f0e4b05039ea2f27d5"
+      }
+    ],
+    "coverImage": "scene1.jpeg",
+    "images": [
+      {
+        "url": "scene1.jpeg",
+        "_id": "680a39f0e4b05039ea2f27d8",
+        "id": "680a39f0e4b05039ea2f27d8"
+      }
+    ],
+    "category": "680a2c23662d9661df208862",
+    "ratingsQuantity": 0,
+    "createdAt": "2025-04-24T13:17:36.145Z",
+    "updatedAt": "2025-04-24T13:17:36.145Z",
+    "reviews": [],
+    "id": "680a39f0e4b05039ea2f27d1"
+  },
+  {
+    "_id": "680a39f0e4b05039ea2f27e1",
+    "titleEn": "Scenario 4 - No Sizes No Colors(Cart Test)",
+    "titleAr": "سيناريو 4 - بدون مقاسات وبدون ألوان(Cart Test)",
+    "descriptionEn": "Product without sizes and without any colors.",
+    "descriptionAr": "منتج بدون مقاسات وبدون أي ألوان.",
+    "quantity": 100,
+    "sold": 0,
+    "price": 150,
+    "colors": [],
+    "sizes": [],
+    "coverImage": "scene4.jpeg",
+    "images": [
+      {
+        "url": "scene4.jpeg",
+        "_id": "680a39f0e4b05039ea2f27e2",
+        "id": "680a39f0e4b05039ea2f27e2"
+      }
+    ],
+    "category": "680a2c33662d9661df208865",
+    "ratingsQuantity": 0,
+    "createdAt": "2025-04-24T13:17:36.145Z",
+    "updatedAt": "2025-04-24T13:17:36.145Z",
+    "reviews": [],
+    "id": "680a39f0e4b05039ea2f27e1"
+  },
+  {
+    "_id": "680a39f0e4b05039ea2f27d9",
+    "titleEn": "Scenario 2 - Sizes only(Cart Test)",
+    "titleAr": "سيناريو 2 - مقاسات فقط(Cart Test)",
+    "descriptionEn": "Product with sizes but no colors in sizes or globally.",
+    "descriptionAr": "منتج يحتوي على مقاسات فقط، بدون ألوان سواء داخل المقاسات أو بشكل عام.",
+    "quantity": 100,
+    "sold": 0,
+    "price": 300,
+    "colors": [],
+    "sizes": [
+      {
+        "size": "S",
+        "quantity": 10,
+        "price": 300,
+        "priceAfterDiscount": 270,
+        "colors": [],
+        "_id": "680a39f0e4b05039ea2f27da",
+        "id": "680a39f0e4b05039ea2f27da"
+      },
+      {
+        "size": "XL",
+        "quantity": 10,
+        "price": 300,
+        "priceAfterDiscount": 270,
+        "colors": [],
+        "_id": "680a39f0e4b05039ea2f27db",
+        "id": "680a39f0e4b05039ea2f27db"
+      }
+    ],
+    "coverImage": "scene2.jpeg",
+    "images": [
+      {
+        "url": "scene2.jpeg",
+        "_id": "680a39f0e4b05039ea2f27dc",
+        "id": "680a39f0e4b05039ea2f27dc"
+      }
+    ],
+    "category": "680a2c33662d9661df208865",
+    "ratingsQuantity": 0,
+    "createdAt": "2025-04-24T13:17:36.145Z",
+    "updatedAt": "2025-04-24T13:17:36.145Z",
+    "reviews": [],
+    "id": "680a39f0e4b05039ea2f27d9"
+  },
+  {
+    "_id": "680a39f0e4b05039ea2f27dd",
+    "titleEn": "Scenario 3 - Colors only(Cart Test)",
+    "titleAr": "سيناريو 3 - ألوان فقط(Cart Test)",
+    "descriptionEn": "Product without sizes but has global colors.",
+    "descriptionAr": "منتج بدون مقاسات ولكنه يحتوي على ألوان عامة.",
+    "quantity": 100,
+    "sold": 0,
+    "price": 200,
+    "colors": [
+      {
+        "color": "black",
+        "quantity": 50,
+        "_id": "680a39f0e4b05039ea2f27de",
+        "id": "680a39f0e4b05039ea2f27de"
+      },
+      {
+        "color": "white",
+        "quantity": 50,
+        "_id": "680a39f0e4b05039ea2f27df",
+        "id": "680a39f0e4b05039ea2f27df"
+      }
+    ],
+    "sizes": [],
+    "coverImage": "scene3.jpeg",
+    "images": [
+      {
+        "url": "scene3.jpeg",
+        "_id": "680a39f0e4b05039ea2f27e0",
+        "id": "680a39f0e4b05039ea2f27e0"
+      }
+    ],
+    "category": "680a2c23662d9661df208862",
+    "ratingsQuantity": 0,
+    "createdAt": "2025-04-24T13:17:36.145Z",
+    "updatedAt": "2025-04-24T13:17:36.145Z",
+    "reviews": [],
+    "id": "680a39f0e4b05039ea2f27dd"
+  }
+]

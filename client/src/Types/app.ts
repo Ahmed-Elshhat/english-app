@@ -1,0 +1,48 @@
+// Redux
+export type initialStateResetDataPass = {
+  email: string;
+  resetCode: string;
+};
+
+// Signup page
+export type SignupFormState = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+// Login Page
+export type LoginFormState = {
+  email: string;
+  password: string;
+};
+
+// User Schema
+export type UserSchema = {
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  addresses: [];
+  id: string;
+  _id: string;
+  startShift: {
+    hour: number;
+    minutes: number;
+  };
+  endShift: {
+    hour: number;
+    minutes: number;
+  };
+};
+
+// getUser Context
+export type initialStateGetUser = {
+  loading: boolean;
+  data: UserSchema | null;
+  error: string;
+};
