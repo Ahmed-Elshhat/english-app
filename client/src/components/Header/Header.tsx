@@ -31,7 +31,7 @@ function Header() {
 
             <ul>
               <li>
-                <Link href="/playlists">
+                <Link href="/playlists/series">
                   playlists
                   <span></span>
                   <span></span>
