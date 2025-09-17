@@ -111,6 +111,9 @@
           margin-bottom: 6px;
           line-height: 1.4;
           word-break: break-word;
+          @media (max-width: 350px) {
+            font-size: 17px !important;
+          }
         }
 
         p {
