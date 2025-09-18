@@ -1,12 +1,3 @@
-// import "./watch.scss";
-
-// function WatchPage() {
-//   return <div className="Watch">WatchPage</div>;
-// }
-
-// export default WatchPage;
-
-// WatchPage.jsx
 import Image from "next/image";
 import "./watch.scss";
 import Header from "@/components/Header/Header";
@@ -21,15 +12,14 @@ function WatchPage() {
       <div className="container">
         {/* Main Content */}
         <div className="main-content">
-
           {/* Subtitles */}
           <div className="subtitles">
-          {/* Video Player */}
-          <div className="video-player">
-            <video controls>
-              <source src="/videos/video1.mp4" type="video/mp4" />
-            </video>
-          </div>
+            {/* Video Player */}
+            <div className="video-player">
+              <video controls poster="/images/poster.png">
+                <source src="/videos/video1.mp4" type="video/mp4" />
+              </video>
+            </div>
             <div className="controls">
               <button title="Speed">1x</button>
               <button title="Repeat sentences">
