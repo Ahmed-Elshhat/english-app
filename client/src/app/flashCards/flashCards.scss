@@ -1,7 +1,4 @@
 .Flash_Cards {
-  background-color: #161a26;
-  height: 100vh;
-  overflow-x: hidden;
   padding-bottom: 40px;
 
   > h2 {
@@ -138,11 +135,6 @@
       &:hover {
         transform: translateY(-5px) scale(1.02);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-
-        .image svg {
-          transform: scale(1.2);
-          transition: transform 0.3s ease;
-        }
       }
 
       .image {
