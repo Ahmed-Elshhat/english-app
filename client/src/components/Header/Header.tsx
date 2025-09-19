@@ -71,7 +71,7 @@ function Header() {
               </li>
 
               <li>
-                <Link href="/history">
+                <Link href="/history/videos">
                   History
                   <span></span>
                   <span></span>

@@ -167,7 +167,14 @@
         flex-direction: column;
         justify-content: space-between;
 
+        @media (max-width: 849px) {
+          padding: 20px 10px;
+          height: 150px;
+        }
+
         @media (max-width: 400px) {
+          gap: 20px;
+          justify-content: center;
           padding: 0;
           padding-right: 5px;
           margin-bottom: 5px;
