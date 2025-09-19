@@ -69,6 +69,14 @@ function Header() {
                   <span></span>
                 </Link>
               </li>
+
+              <li>
+                <Link href="/history">
+                  History
+                  <span></span>
+                  <span></span>
+                </Link>
+              </li>
             </ul>
           </div>
         </nav>

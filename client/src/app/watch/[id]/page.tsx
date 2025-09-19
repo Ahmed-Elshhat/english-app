@@ -4,16 +4,27 @@ import Header from "@/components/Header/Header";
 import { RiRepeat2Line } from "react-icons/ri";
 import { IoPause } from "react-icons/io5";
 import Link from "next/link";
+import { MdPlayDisabled } from "react-icons/md";
 
 function WatchPage() {
   return (
-    <div className="watch-page">
+    <div className="Watch">
       <Header />
       <div className="container">
         {/* Main Content */}
         <div className="main-content">
           {/* Subtitles */}
           <div className="subtitles">
+            <div className="block_video">
+              <MdPlayDisabled />
+              <h3>
+                Content limited to subscribers. Subscribe to arablish to access
+                video
+              </h3>
+              <Link href="/plans">
+                <button>Go to subscribe</button>
+              </Link>
+            </div>
             {/* Video Player */}
             <div className="video-player">
               <video controls poster="/images/poster.png">
