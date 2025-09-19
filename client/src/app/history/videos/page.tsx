@@ -29,7 +29,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -49,7 +49,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -69,7 +69,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -89,7 +89,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -109,7 +109,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -129,7 +129,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -149,7 +149,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -169,7 +169,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -189,7 +189,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -209,7 +209,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -229,7 +229,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -249,7 +249,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -269,7 +269,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -289,7 +289,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -309,7 +309,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -329,7 +329,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -349,7 +349,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -369,7 +369,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -389,7 +389,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}
@@ -409,7 +409,7 @@ function HistoryVideosPage() {
             <div className="card">
               <div className="image">
                 <Image
-                  src="/images/flash_card_img.jpeg"
+                  src="/images/poster.png"
                   alt="video image"
                   width={150}
                   height={150}

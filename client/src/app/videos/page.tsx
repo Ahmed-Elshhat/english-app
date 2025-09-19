@@ -53,7 +53,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -73,7 +74,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -93,7 +95,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -113,7 +116,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -133,7 +137,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -153,7 +158,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -173,7 +179,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -193,7 +200,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -213,7 +221,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -233,7 +242,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -253,7 +263,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -273,7 +284,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -293,7 +305,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -313,7 +326,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -333,7 +347,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -353,7 +368,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -373,7 +389,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -393,7 +410,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -413,7 +431,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -433,7 +452,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -453,7 +473,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
@@ -473,7 +494,8 @@ function VideosPage() {
               </p>
             </div>
           </div>
-        </Link>        <Link href="/watch/1">
+        </Link>{" "}
+        <Link href="/watch/1">
           <div className="card">
             <div className="image">
               <Image
