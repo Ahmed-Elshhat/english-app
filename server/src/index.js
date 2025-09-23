@@ -20,7 +20,7 @@ const globalError = require("./middlewares/errorMiddleware");
 const dbConnection = require("./config/database");
 // Create uploads directory and subdirectories if they don't exist
 const baseUploadsPath = path.join(__dirname, "..", "uploads");
-const folders = ["brands", "categories", "products"];
+const folders = ["playlists"];
 
 if (!fs.existsSync(baseUploadsPath)) {
   fs.mkdirSync(baseUploadsPath);

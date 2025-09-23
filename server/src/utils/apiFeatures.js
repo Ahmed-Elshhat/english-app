@@ -45,7 +45,7 @@ class ApiFeatures {
     if (this.queryString.keyword) {
       const safeKeyword = escapeRegExp(this.queryString.keyword);
       let query = {};
-      if (modelName === "Products") {
+      if (modelName === "Playlists") {
         query.$or = [
           { title: { $regex: safeKeyword, $options: "i" } },
           { description: { $regex: safeKeyword, $options: "i" } },

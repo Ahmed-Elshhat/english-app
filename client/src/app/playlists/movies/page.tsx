@@ -6,6 +6,14 @@ import Link from "next/link";
 function MoviesPlaylistsPage() {
   return (
     <div className="Movies_Playlists">
+      <div className="filtration">
+        <Link href="/playlists/series">
+          <button>Series</button>
+        </Link>
+        <Link href="/playlists/movies">
+          <button>Movies</button>
+        </Link>
+      </div>
       <div className="cards">
         <Link href="/seasons&episodes">
           <div className="card">

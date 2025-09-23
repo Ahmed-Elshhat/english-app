@@ -46,3 +46,21 @@ export type initialStateGetUser = {
   data: UserSchema | null;
   error: string;
 };
+
+export type PlaylistSchema = {
+  _id: string;
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  image: string;
+  imageUrl: string;
+  seasons: {
+    _id: string;
+    id: string;
+    seasonNumber: number;
+    countOfEpisodes: number;
+  }[];
+  createdAt: Date;
+  updatedAt: Date;
+};

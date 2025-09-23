@@ -11,14 +11,6 @@ export default function PlaylistsLayout({
     <div className="Playlists">
       <Header />
       <h2>Playlists</h2>
-      <div className="filtration">
-        <Link href="/playlists/series">
-          <button>Series</button>
-        </Link>
-        <Link href="/playlists/movies">
-          <button>Movies</button>
-        </Link>
-      </div>
       {children}
     </div>
   );

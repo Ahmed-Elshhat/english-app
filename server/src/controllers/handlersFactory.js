@@ -36,27 +36,22 @@ exports.updateOne = (Model, populationOpt) =>
 exports.createOne = (Model, modelName) =>
   asyncHandler(async (req, res) => {
     const body = {
-      ...req.body,
-      ...(modelName === "users" && { role: "employee" }),
+      ...req.body
     };
 
     const newDoc = await Model.create(body);
     res.status(201).json({ data: newDoc });
   });
 
-exports.getOne = (Model, populationOpt, modelName) =>
+exports.getOne = (Model, populationOpt) =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    let user =
-      modelName === "order" && req.user.role === "user" ? req.user.id : null;
-    let role = modelName === "users" ? "employee" : null;
     // 1) Build query
-    // let query = Model.findById(id);
-    let query = Model.findOne({
-      _id: id,
-      ...(user && { user }),
-      ...(role && { role }),
-    });
+    let query = Model.findById(id);
+    // let query = Model.findOne({
+    //   _id: id,
+    // });
+
     if (populationOpt) {
       query = query.populate({ path: populationOpt, select: "-__v" });
     }
@@ -77,12 +72,7 @@ exports.getOne = (Model, populationOpt, modelName) =>
 
 exports.getAll = (Model, searchKeyWord, populationOpt) =>
   asyncHandler(async (req, res) => {
-    const needsFilter = [
-      "SubCategories",
-      "Reviews",
-      "Orders",
-      "Users",
-    ].includes(searchKeyWord);
+    const needsFilter = [].includes(searchKeyWord);
     const filterObj = needsFilter ? req.filterObj : {};
 
     let apiFeatures = new ApiFeatures(Model.find(filterObj), req.query)
