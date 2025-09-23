@@ -22,8 +22,23 @@ const {
   getRandomPlaylists,
 } = require("../controllers/playlistController");
 
-router.post("/random/", parseJSON, getRandomPlaylistsValidator, getRandomPlaylists);
+/**
+ * @route   POST /random
+ * @desc    Get random playlists filtered by type and excluding given IDs
+ * @access  Public/Custom (depends on controller logic)
+ */
+router.post(
+  "/random/",
+  parseJSON,
+  getRandomPlaylistsValidator,
+  getRandomPlaylists
+);
 
+/**
+ * @route   / (root playlist routes)
+ * @desc    GET    -> Fetch all playlists with filters/pagination
+ *          POST   -> Create a new playlist with image upload and validation
+ */
 router
   .route("/")
   .get(getPlaylistsValidator, getPlaylists)
@@ -35,6 +50,12 @@ router
     createPlaylist
   );
 
+/**
+ * @route   /:id
+ * @desc    GET    -> Fetch a single playlist by ID
+ *          PUT    -> Update playlist details with optional image upload
+ *          DELETE -> Remove playlist by ID
+ */
 router
   .route("/:id")
   .get(getPlaylistValidator, getPlaylist)

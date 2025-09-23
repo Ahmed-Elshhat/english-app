@@ -36,7 +36,7 @@ exports.updateOne = (Model, populationOpt) =>
 exports.createOne = (Model, modelName) =>
   asyncHandler(async (req, res) => {
     const body = {
-      ...req.body
+      ...req.body,
     };
 
     const newDoc = await Model.create(body);

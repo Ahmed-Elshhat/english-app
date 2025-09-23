@@ -41,7 +41,8 @@ class ApiFeatures {
 
   search(modelName) {
     // 5) Search
-    const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapeRegExp = (string) =>
+      string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     if (this.queryString.keyword) {
       const safeKeyword = escapeRegExp(this.queryString.keyword);
       let query = {};
