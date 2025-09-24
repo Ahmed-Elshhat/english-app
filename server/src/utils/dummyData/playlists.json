@@ -1,0 +1,766 @@
+[
+  {
+    "type": "movie",
+    "title": "Playlist 1",
+    "description": "This is the description for playlist 1.",
+    "image": "playlist_1.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 2",
+    "description": "This is the description for playlist 2.",
+    "image": "playlist_2.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 13
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 17
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 9
+      },
+      {
+        "seasonNumber": 4,
+        "countOfEpisodes": 18
+      },
+      {
+        "seasonNumber": 5,
+        "countOfEpisodes": 10
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 3",
+    "description": "This is the description for playlist 3.",
+    "image": "playlist_3.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 12
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 6
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 12
+      },
+      {
+        "seasonNumber": 4,
+        "countOfEpisodes": 5
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 4",
+    "description": "This is the description for playlist 4.",
+    "image": "playlist_4.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 6
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 15
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 6
+      },
+      {
+        "seasonNumber": 4,
+        "countOfEpisodes": 10
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 5",
+    "description": "This is the description for playlist 5.",
+    "image": "playlist_5.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 12
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 14
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 6
+      },
+      {
+        "seasonNumber": 4,
+        "countOfEpisodes": 15
+      },
+      {
+        "seasonNumber": 5,
+        "countOfEpisodes": 9
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 6",
+    "description": "This is the description for playlist 6.",
+    "image": "playlist_6.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 7",
+    "description": "This is the description for playlist 7.",
+    "image": "playlist_7.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 8
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 18
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 8",
+    "description": "This is the description for playlist 8.",
+    "image": "playlist_8.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 9",
+    "description": "This is the description for playlist 9.",
+    "image": "playlist_9.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 17
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 10",
+    "description": "This is the description for playlist 10.",
+    "image": "playlist_10.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 11
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 11",
+    "description": "This is the description for playlist 11.",
+    "image": "playlist_11.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 12",
+    "description": "This is the description for playlist 12.",
+    "image": "playlist_12.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 5
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 13",
+    "description": "This is the description for playlist 13.",
+    "image": "playlist_13.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 14",
+    "description": "This is the description for playlist 14.",
+    "image": "playlist_14.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 20
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 11
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 12
+      },
+      {
+        "seasonNumber": 4,
+        "countOfEpisodes": 15
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 15",
+    "description": "This is the description for playlist 15.",
+    "image": "playlist_15.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 9
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 5
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 6
+      },
+      {
+        "seasonNumber": 4,
+        "countOfEpisodes": 8
+      },
+      {
+        "seasonNumber": 5,
+        "countOfEpisodes": 18
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 16",
+    "description": "This is the description for playlist 16.",
+    "image": "playlist_16.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 17",
+    "description": "This is the description for playlist 17.",
+    "image": "playlist_17.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 18",
+    "description": "This is the description for playlist 18.",
+    "image": "playlist_18.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 19",
+    "description": "This is the description for playlist 19.",
+    "image": "playlist_19.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 20",
+    "description": "This is the description for playlist 20.",
+    "image": "playlist_20.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 21",
+    "description": "This is the description for playlist 21.",
+    "image": "playlist_21.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 20
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 12
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 19
+      },
+      {
+        "seasonNumber": 4,
+        "countOfEpisodes": 11
+      },
+      {
+        "seasonNumber": 5,
+        "countOfEpisodes": 10
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 22",
+    "description": "This is the description for playlist 22.",
+    "image": "playlist_22.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 23",
+    "description": "This is the description for playlist 23.",
+    "image": "playlist_23.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 24",
+    "description": "This is the description for playlist 24.",
+    "image": "playlist_24.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 25",
+    "description": "This is the description for playlist 25.",
+    "image": "playlist_25.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 26",
+    "description": "This is the description for playlist 26.",
+    "image": "playlist_26.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 19
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 8
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 27",
+    "description": "This is the description for playlist 27.",
+    "image": "playlist_27.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 28",
+    "description": "This is the description for playlist 28.",
+    "image": "playlist_28.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 19
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 5
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 11
+      },
+      {
+        "seasonNumber": 4,
+        "countOfEpisodes": 13
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 29",
+    "description": "This is the description for playlist 29.",
+    "image": "playlist_29.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 30",
+    "description": "This is the description for playlist 30.",
+    "image": "playlist_30.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 9
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 9
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 12
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 31",
+    "description": "This is the description for playlist 31.",
+    "image": "playlist_31.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 32",
+    "description": "This is the description for playlist 32.",
+    "image": "playlist_32.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 33",
+    "description": "This is the description for playlist 33.",
+    "image": "playlist_33.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 34",
+    "description": "This is the description for playlist 34.",
+    "image": "playlist_34.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 16
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 10
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 35",
+    "description": "This is the description for playlist 35.",
+    "image": "playlist_35.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 10
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 16
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 11
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 36",
+    "description": "This is the description for playlist 36.",
+    "image": "playlist_36.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 11
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 37",
+    "description": "This is the description for playlist 37.",
+    "image": "playlist_37.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 38",
+    "description": "This is the description for playlist 38.",
+    "image": "playlist_38.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 39",
+    "description": "This is the description for playlist 39.",
+    "image": "playlist_39.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 40",
+    "description": "This is the description for playlist 40.",
+    "image": "playlist_40.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 41",
+    "description": "This is the description for playlist 41.",
+    "image": "playlist_41.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 10
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 6
+      },
+      {
+        "seasonNumber": 3,
+        "countOfEpisodes": 12
+      },
+      {
+        "seasonNumber": 4,
+        "countOfEpisodes": 8
+      },
+      {
+        "seasonNumber": 5,
+        "countOfEpisodes": 19
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 42",
+    "description": "This is the description for playlist 42.",
+    "image": "playlist_42.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 19
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 5
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 43",
+    "description": "This is the description for playlist 43.",
+    "image": "playlist_43.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 44",
+    "description": "This is the description for playlist 44.",
+    "image": "playlist_44.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 45",
+    "description": "This is the description for playlist 45.",
+    "image": "playlist_45.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 46",
+    "description": "This is the description for playlist 46.",
+    "image": "playlist_46.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 47",
+    "description": "This is the description for playlist 47.",
+    "image": "playlist_47.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 48",
+    "description": "This is the description for playlist 48.",
+    "image": "playlist_48.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "movie",
+    "title": "Playlist 49",
+    "description": "This is the description for playlist 49.",
+    "image": "playlist_49.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 1
+      }
+    ]
+  },
+  {
+    "type": "series",
+    "title": "Playlist 50",
+    "description": "This is the description for playlist 50.",
+    "image": "playlist_50.jpeg",
+    "seasons": [
+      {
+        "seasonNumber": 1,
+        "countOfEpisodes": 19
+      },
+      {
+        "seasonNumber": 2,
+        "countOfEpisodes": 10
+      }
+    ]
+  }
+]

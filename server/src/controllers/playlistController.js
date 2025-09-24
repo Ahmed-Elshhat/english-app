@@ -100,28 +100,48 @@ exports.getPlaylist = factory.getOne(Playlist);
  * - excludeIds ensures no duplicates from client cache
  */
 exports.getRandomPlaylists = asyncHandler(async (req, res, next) => {
-  // Step 1: Extract parameters
   const { playlistsType, playlistsSize } = req.query;
-  // Step 2: Extract excludeIds from body (default empty array)
   const { excludeIds = [] } = req.body;
 
-  // Step 3-4: Build and execute aggregation pipeline
+  const objectIds = excludeIds.map(
+    (id) => new mongoose.Types.ObjectId(String(id))
+  );
+
+  // 1 - Count how many playlists are left after excluding the given IDs
+  const totalCount = await Playlist.countDocuments({
+    type: playlistsType,
+    _id: { $nin: objectIds },
+  });
+
+  // 2 - Calculate the remaining count after this fetch (never negative)
+  const remainingCount = Math.max(totalCount - (+playlistsSize || 20), 0);
+
+  // 3 - Fetch a random batch of playlists (limited by playlistsSize)
   const playlists = await Playlist.aggregate([
     {
       $match: {
         type: playlistsType,
-        _id: {
-          // Convert each id to ObjectId explicitly to ensure correct comparison in Mongo
-          $nin: excludeIds.map((id) => new mongoose.Types.ObjectId(String(id))),
-        },
+        _id: { $nin: objectIds },
       },
     },
-    // Step 4: Random sample; use numeric playlistsSize if provided, otherwise default to 20
     { $sample: { size: +playlistsSize || 20 } },
   ]);
 
-  // Step 5: Return results
-  res.status(200).json({ data: playlists });
+  // 4 - Format playlist documents (add absolute image URL if exists)
+  const formatted = playlists.map((p) => ({
+    ...p,
+    imageUrl: p.image ? `${process.env.BASE_URL}/playlists/${p.image}` : null,
+  }));
+
+  // 5 - Calculate how many pages are left based on the remaining count
+  const remainingPages = Math.ceil(remainingCount / (+playlistsSize || 20));
+
+  res.status(200).json({
+    results: playlists.length,
+    total: remainingCount,
+    remainingPages,
+    playlists: formatted,
+  });
 });
 
 /**

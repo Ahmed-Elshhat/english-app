@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { PLAYLISTS } from "@/Api/Api";
 import { Axios } from "@/Api/axios";
 import CopyButton from "@/components/CopyButton/CopyButton";
@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { FaEye, FaTrash } from "react-icons/fa";
 import { MdEditSquare } from "react-icons/md";
-import "./playlists.scss"
+import "./playlists.scss";
 
 function ShowPlaylistsPage() {
   const [paginationResults, setPaginationResults] = useState({
@@ -26,7 +26,7 @@ function ShowPlaylistsPage() {
       setLoading({ status: true, type: "normal" });
 
       try {
-        const res = await Axios.get(`${PLAYLISTS}?page=1&limit=10`);
+        const res = await Axios.get(`${PLAYLISTS}?page=1&limit=30`);
         if (res.status === 200) {
           setLoading({ status: false, type: "normal" });
           setPlaylists(res.data.data);
@@ -41,7 +41,7 @@ function ShowPlaylistsPage() {
     getPlaylists();
   }, []);
 
-  const fetchMoreProducts = useCallback(async () => {
+  const fetchMorePlaylists = useCallback(async () => {
     if (
       loading.status ||
       paginationResults.next > paginationResults.numberOfPages ||
@@ -57,7 +57,7 @@ function ShowPlaylistsPage() {
       setLoading({ status: true, type: "bottom" });
       try {
         const res = await Axios.get(
-          `${PLAYLISTS}?page=${paginationResults.next}&limit=10`
+          `${PLAYLISTS}?page=${paginationResults.next}&limit=30`
         );
         if (res.status === 200) {
           setLoading({ status: false, type: "bottom" });
@@ -73,9 +73,9 @@ function ShowPlaylistsPage() {
   }, [loading, paginationResults]);
 
   useEffect(() => {
-    window.addEventListener("scroll", fetchMoreProducts);
-    return () => window.removeEventListener("scroll", fetchMoreProducts);
-  }, [fetchMoreProducts]);
+    window.addEventListener("scroll", fetchMorePlaylists);
+    return () => window.removeEventListener("scroll", fetchMorePlaylists);
+  }, [fetchMorePlaylists]);
 
   const handleDelete = async (id: string) => {
     setLoading({ status: true, type: "normal" });
@@ -119,9 +119,7 @@ function ShowPlaylistsPage() {
 
                     <td data-label="Title">{playlist.title}</td>
 
-                    <td data-label="Description">
-                      {playlist.description}
-                    </td>
+                    <td data-label="Description">{playlist.description}</td>
 
                     <td data-label="Actions">
                       <div className="action-buttons">

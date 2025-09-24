@@ -1,9 +1,27 @@
-import Image from "next/image";
-import { RiPlayList2Fill } from "react-icons/ri";
-import "./series.scss";
 import Link from "next/link";
+import { Axios } from "@/Api/axios";
+import { PLAYLISTS } from "@/Api/Api";
+import { PlaylistSchema } from "@/Types/app";
+import "./series.scss";
+import PlaylistCards from "@/components/PlaylistsCards/PlaylistsCards";
 
-function SeriesPlaylistsPage() {
+async function SeriesPlaylistsPage() {
+  const playlists: PlaylistSchema[] = [];
+  let remainingPages: number = 0;
+
+  try {
+    const res = await Axios.post(
+      `${PLAYLISTS}/random?playlistsType=series&playlistsSize=3`
+    );
+    if (res.status === 200) {
+      const data = res.data;
+      playlists.push(...data.playlists);
+      remainingPages = data.remainingPages;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+
   return (
     <div className="Series_Playlists">
       <div className="filtration">
@@ -14,122 +32,11 @@ function SeriesPlaylistsPage() {
           <button>Movies</button>
         </Link>
       </div>
-      <div className="cards">
-        <Link href="/seasons&episodes">
-          <div className="card">
-            <div className="image">
-              <Image
-                src="/images/series_playlist_img.jpg"
-                alt="video image"
-                width={150}
-                height={150}
-                priority
-              />
-              <span>10 videos</span>
-              <RiPlayList2Fill />
-            </div>
-            <div className="content">
-              <h2>Difference between I wish and I hope</h2>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Deserunt, doloremque.
-              </p>
-            </div>
-          </div>
-        </Link>
-
-        <Link href="/seasons&episodes">
-          <div className="card">
-            <div className="image">
-              <Image
-                src="/images/series_playlist_img.jpg"
-                alt="video image"
-                width={150}
-                height={150}
-                priority
-              />
-              <span>10 videos</span>
-              <RiPlayList2Fill />
-            </div>
-            <div className="content">
-              <h2>Difference between I wish and I hope</h2>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Deserunt, doloremque.
-              </p>
-            </div>
-          </div>
-        </Link>
-
-        <Link href="/seasons&episodes">
-          <div className="card">
-            <div className="image">
-              <Image
-                src="/images/series_playlist_img.jpg"
-                alt="video image"
-                width={150}
-                height={150}
-                priority
-              />
-              <span>10 videos</span>
-              <RiPlayList2Fill />
-            </div>
-            <div className="content">
-              <h2>Difference between I wish and I hope</h2>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Deserunt, doloremque.
-              </p>
-            </div>
-          </div>
-        </Link>
-
-        <Link href="/seasons&episodes">
-          <div className="card">
-            <div className="image">
-              <Image
-                src="/images/series_playlist_img.jpg"
-                alt="video image"
-                width={150}
-                height={150}
-                priority
-              />
-              <span>10 videos</span>
-              <RiPlayList2Fill />
-            </div>
-            <div className="content">
-              <h2>Difference between I wish and I hope</h2>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Deserunt, doloremque.
-              </p>
-            </div>
-          </div>
-        </Link>
-
-        <Link href="/seasons&episodes">
-          <div className="card">
-            <div className="image">
-              <Image
-                src="/images/series_playlist_img.jpg"
-                alt="video image"
-                width={150}
-                height={150}
-                priority
-              />
-              <span>10 videos</span>
-              <RiPlayList2Fill />
-            </div>
-            <div className="content">
-              <h2>Difference between I wish and I hope</h2>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Deserunt, doloremque.
-              </p>
-            </div>
-          </div>
-        </Link>
-      </div>
+      <PlaylistCards
+        playlistsList={playlists}
+        remainingPages={remainingPages}
+        playlistsType={"series"}
+      />
     </div>
   );
 }
