@@ -81,8 +81,35 @@ exports.createPlaylistValidator = [
 ];
 
 exports.getPlaylistsValidator = [
-  validateExactFields([], [], ["page", "limit", "keyword", "sort", "fields"]),
-
+  validateExactFields(
+    [],
+    [],
+    [
+      "page",
+      "limit",
+      "keyword",
+      "sort",
+      "fields",
+      "type",
+      "sort",
+      "keyword",
+      "_id",
+    ]
+  ),
+  check("type")
+    .optional()
+    .isIn(["movie", "series"])
+    .withMessage("The playlist type must be either 'movie' or 'series'"),
+  check("sort")
+    .optional()
+    .isIn(["-createdAt", "createdAt"])
+    .withMessage(
+      "The playlist sort must be either '-createdAt' or 'createdAt'"
+    ),
+  check("_id")
+    .optional()
+    .isMongoId()
+    .withMessage("The provided ID must be a valid ID"),
   validatorMiddleware,
 ];
 

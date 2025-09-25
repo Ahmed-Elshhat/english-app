@@ -6,8 +6,8 @@ const path = require("path");
 const mongoose = require("mongoose");
 const Playlist = require("../models/playlistModel");
 const ApiError = require("../utils/apiError");
-const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
 const factory = require("./handlersFactory");
+const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
 
 exports.uploadPlaylistImage = uploadSingleImage("image");
 
@@ -99,7 +99,7 @@ exports.getPlaylist = factory.getOne(Playlist);
  * - playlistsSize defines how many to fetch (default 20)
  * - excludeIds ensures no duplicates from client cache
  */
-exports.getRandomPlaylists = asyncHandler(async (req, res, next) => {
+exports.getRandomPlaylists = asyncHandler(async (req, res) => {
   const { playlistsType, playlistsSize } = req.query;
   const { excludeIds = [] } = req.body;
 

@@ -1,9 +1,11 @@
 const userRoute = require("./userRoute");
 const authRoute = require("./authRoute");
 const playlistRoute = require("./playlistRoute");
+const episodeRoute = require("./episodeRoute");
 
 const mountRoutes = (app) => {
   app.use("/api/v1/playlists", playlistRoute);
+  app.use("/api/v1/episodes", episodeRoute);
   app.use("/api/v1/users", userRoute);
   app.use("/api/v1/auth", authRoute);
 };

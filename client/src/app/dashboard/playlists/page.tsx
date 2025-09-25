@@ -5,33 +5,58 @@ import CopyButton from "@/components/CopyButton/CopyButton";
 import Loading from "@/components/Loading/Loading";
 import { PlaylistSchema } from "@/Types/app";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FaEye, FaTrash } from "react-icons/fa";
 import { MdEditSquare } from "react-icons/md";
 import "./playlists.scss";
 
 function ShowPlaylistsPage() {
+  const [playlists, setPlaylists] = useState<PlaylistSchema[]>([]);
   const [paginationResults, setPaginationResults] = useState({
     next: 1,
     numberOfPages: 1,
   });
-  const [playlists, setPlaylists] = useState<PlaylistSchema[]>([]);
   const [loading, setLoading] = useState({
     status: true,
     type: "normal",
   });
+  const [idError, setIdError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchBy, setSearchBy] = useState("titleDesc");
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [playlistType, setPlaylistType] = useState("");
+  const stopLoading = useRef(0);
 
   useEffect(() => {
     const getPlaylists = async () => {
-      setLoading({ status: true, type: "normal" });
+      if (stopLoading.current === 0) {
+        setLoading({ status: true, type: "normal" });
+      }
+      const playlistTypeQuery =
+        playlistType !== "" ? `&type=${playlistType}` : "";
+      const sortOrderQuery =
+        sortOrder !== "" &&
+        `&sort=${sortOrder === "newest" ? "-" : ""}createdAt`;
+
+      const keyword =
+        searchBy !== "" && searchBy === "titleDesc" && searchTerm !== ""
+          ? `&keyword=${searchTerm}`
+          : "";
+      const _id =
+        searchBy !== "" && searchBy === "id" && searchTerm !== ""
+          ? `&_id=${searchTerm}`
+          : "";
 
       try {
-        const res = await Axios.get(`${PLAYLISTS}?page=1&limit=30`);
+        const res = await Axios.get(
+          `${PLAYLISTS}?page=1&limit=30${playlistTypeQuery}${sortOrderQuery}${keyword}${_id}`
+        );
         if (res.status === 200) {
           setLoading({ status: false, type: "normal" });
           setPlaylists(res.data.data);
           setPaginationResults(res.data.paginationResults);
           console.log(res.data);
+          stopLoading.current = 1;
         }
       } catch (err) {
         setLoading({ status: false, type: "normal" });
@@ -39,7 +64,7 @@ function ShowPlaylistsPage() {
       }
     };
     getPlaylists();
-  }, []);
+  }, [playlistType, searchBy, searchTerm, sortOrder]);
 
   const fetchMorePlaylists = useCallback(async () => {
     if (
@@ -92,10 +117,74 @@ function ShowPlaylistsPage() {
     }
   };
 
+  const handleSearchTermChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // إذا المستخدم مختار البحث بالـ ID
+    if (searchBy === "id") {
+      // تحقق من صحة الـ MongoID
+      if (value && !/^[0-9a-fA-F]{24}$/.test(value)) {
+        setIdError("Not a valid MongoDB ID");
+      } else {
+        setIdError("");
+      }
+    } else {
+      setIdError("");
+    }
+  };
+
   return (
     <div className="Playlists">
       {loading.status && loading.type === "normal" && <Loading />}
       <div className="playlists-container">
+        <div className="filtration">
+          {/* Search input */}
+          <div className="input_cover">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              className={idError ? "input-error" : ""}
+              onChange={handleSearchTermChange}
+            />
+            {idError && <p className="error-message in">{idError}</p>}
+          </div>
+
+          {/* Search type selector */}
+          <select
+            value={searchBy}
+            onChange={(e) => {
+              setSearchBy(e.target.value);
+              setSearchTerm("");
+            }}
+          >
+            <option value="id">Search by ID</option>
+            <option value="titleDesc">Search by Title & Description</option>
+          </select>
+
+          {/* Sort order selector */}
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            <option value="newest">Newest to Oldest</option>
+            <option value="oldest">Oldest to Newest</option>
+          </select>
+
+          {/* Playlist type filter */}
+          <select
+            value={playlistType}
+            onChange={(e) => setPlaylistType(e.target.value)}
+          >
+            <option value="">All Types</option>
+            <option value="series">Series</option>
+            <option value="movie">Movies</option>
+          </select>
+        </div>
+
+        {idError && <p className="error-message out">{idError}</p>}
+
         <div className="table-wrapper">
           <table className="custom-table">
             <thead>

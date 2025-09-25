@@ -45,24 +45,34 @@ function ShowPlaylistDetailsPage() {
         </thead>
         <tbody>
           <tr>
-            <td>ID</td>
+            <td>
+              <span>ID</span>
+            </td>
             <td data-label="ID">{playlist._id}</td>
           </tr>
           <tr>
-            <td>Type</td>
+            <td>
+              <span>Type</span>
+            </td>
             <td data-label="Type">{playlist.type}</td>
           </tr>
           <tr>
-            <td>Title</td>
+            <td>
+              <span>Title</span>
+            </td>
             <td data-label="Title">{playlist.title}</td>
           </tr>
           <tr>
-            <td>Description</td>
+            <td>
+              <span>Description</span>
+            </td>
             <td data-label="Description">{playlist.description}</td>
           </tr>
 
           <tr>
-            <td>Image</td>
+            <td>
+              <span>Image</span>
+            </td>
             <td data-label="Image">
               <Image
                 src={playlist.imageUrl}
@@ -75,7 +85,9 @@ function ShowPlaylistDetailsPage() {
           </tr>
 
           <tr>
-            <td>Seasons</td>
+            <td>
+              <span>Seasons</span>
+            </td>
             <td data-label="Seasons">
               {playlist.seasons && playlist.seasons.length > 0 ? (
                 <div className="season-container">
@@ -93,7 +105,9 @@ function ShowPlaylistDetailsPage() {
           </tr>
 
           <tr>
-            <td>createdAt</td>
+            <td>
+              <span>createdAt</span>
+            </td>
             <td data-label="createdAt">
               {playlist.createdAt
                 ? new Date(playlist.createdAt).toLocaleDateString()
@@ -101,7 +115,9 @@ function ShowPlaylistDetailsPage() {
             </td>
           </tr>
           <tr>
-            <td>updatedAt</td>
+            <td>
+              <span>updatedAt</span>
+            </td>
             <td data-label="updatedAt">
               {playlist.updatedAt
                 ? new Date(playlist.updatedAt).toLocaleDateString()

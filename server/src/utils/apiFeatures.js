@@ -51,9 +51,11 @@ class ApiFeatures {
           { title: { $regex: safeKeyword, $options: "i" } },
           { description: { $regex: safeKeyword, $options: "i" } },
         ];
-      } else {
+      }else if (modelName === "Episodes") {
+        query = { title: { $regex: safeKeyword, $options: "i" } };
+      }/*  else {
         query = { name: { $regex: safeKeyword, $options: "i" } };
-      }
+      } */
       this.mongooseQuery = this.mongooseQuery.find(query);
     }
     return this;
