@@ -6,7 +6,9 @@ const Playlist = require("../models/playlistModel");
 const Episode = require("../models/episodeModel");
 
 exports.createEpisode = asyncHandler(async (req, res, next) => {
-  const { episodeNumber, playlistId, seasonNumber } = req.body;
+  const playlistId = req.body.playlistId;
+  const seasonNumber = +req.body.seasonNumber;
+  const episodeNumber = +req.body.episodeNumber;
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -32,6 +34,8 @@ exports.createEpisode = asyncHandler(async (req, res, next) => {
     const currentSeason = playlist.seasons.find(
       (season) => season.seasonNumber === seasonNumber
     );
+    console.log(seasonNumber);
+    console.log(typeof seasonNumber);
     if (!currentSeason) {
       await session.abortTransaction();
       session.endSession();
@@ -95,7 +99,7 @@ exports.updateEpisode = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { title, episodeNumber, playlistId, seasonNumber } = req.body;
 
-  // 1- نجيب الحلقة الأصلية
+  // 1- Fetch the original episode
   const episode = await Episode.findById(id);
   if (!episode) {
     return next(new ApiError("Episode not found", 404));
@@ -104,24 +108,26 @@ exports.updateEpisode = asyncHandler(async (req, res, next) => {
   const oldPlaylistId = episode.playlistId.toString();
   const oldSeasonNumber = episode.seasonNumber;
 
+  // Use new values if provided, otherwise keep the old ones
   const targetPlaylistId = playlistId || oldPlaylistId;
-  const targetSeasonNumber = seasonNumber || oldSeasonNumber;
-  const targetEpisodeNumber = episodeNumber || episode.episodeNumber;
+  const targetSeasonNumber = +seasonNumber || oldSeasonNumber;
+  const targetEpisodeNumber = +episodeNumber || episode.episodeNumber;
 
-  // 2- نتأكد إن الـ playlist الجديدة (أو الحالية) موجودة
+  // 2- Ensure the target playlist exists
   const playlist = await Playlist.findById(targetPlaylistId);
   if (!playlist) {
     return next(new ApiError("Playlist not found", 404));
   }
 
-  // 3- لو playlist فيلم → خطأ
+  // 3- Prevent linking an episode to a movie playlist
   if (playlist.type === "movie") {
     return next(
       new ApiError("Episodes cannot be associated with a movie playlist", 400)
     );
   }
 
-  // 4- نتأكد إن الـ season موجودة في الـ playlist
+  // 4- Ensure the target season exists in the playlist
+  console.log(playlist.seasons);
   const targetSeason = playlist.seasons.find(
     (s) => s.seasonNumber === targetSeasonNumber
   );
@@ -134,12 +140,12 @@ exports.updateEpisode = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // 5- نشيك لو فيه حلقة بنفس (playlistId, seasonNumber, episodeNumber)
+  // 5- Check for duplicate episode with the same playlistId, seasonNumber, and episodeNumber
   const duplicateEpisode = await Episode.findOne({
     playlistId: targetPlaylistId,
     seasonNumber: targetSeasonNumber,
     episodeNumber: targetEpisodeNumber,
-    _id: { $ne: episode._id }, // نستثني الحلقة الحالية
+    _id: { $ne: episode._id }, // Exclude the current episode
   });
 
   if (duplicateEpisode) {
@@ -151,42 +157,70 @@ exports.updateEpisode = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // 6- تحديث العدادات لو اتغير الـ playlist أو الـ season
+  // 6- Update counters if playlist or season changed
   if (playlistId && playlistId !== oldPlaylistId) {
-    // خصم 1 من الـ season القديمة في الـ playlist القديمة
+    // Case 1: Playlist changed → decrement count in old season
     await Playlist.updateOne(
       { _id: oldPlaylistId, "seasons.seasonNumber": oldSeasonNumber },
       { $inc: { "seasons.$.countOfEpisodes": -1 } }
     );
 
-    // إضافة 1 للـ season الجديدة في الـ playlist الجديدة
+    // Increment count in new season
     await Playlist.updateOne(
       { _id: targetPlaylistId, "seasons.seasonNumber": targetSeasonNumber },
       { $inc: { "seasons.$.countOfEpisodes": 1 } }
     );
   } else if (seasonNumber && seasonNumber !== oldSeasonNumber) {
-    // نفس الـ playlist لكن season مختلفة
+    // Case 2: Same playlist but season changed
+    // Decrement old season
     await Playlist.updateOne(
       { _id: oldPlaylistId, "seasons.seasonNumber": oldSeasonNumber },
       { $inc: { "seasons.$.countOfEpisodes": -1 } }
     );
 
+    // Increment new season
     await Playlist.updateOne(
       { _id: oldPlaylistId, "seasons.seasonNumber": targetSeasonNumber },
       { $inc: { "seasons.$.countOfEpisodes": 1 } }
     );
   }
 
-  // 7- نحدث الحقول المطلوبة
+  // 7- Update episode fields if provided
   if (title !== undefined) episode.title = title;
   if (episodeNumber !== undefined) episode.episodeNumber = episodeNumber;
   if (playlistId !== undefined) episode.playlistId = playlistId;
   if (seasonNumber !== undefined) episode.seasonNumber = seasonNumber;
 
+  // Save changes
   await episode.save();
 
+  // Send success response
   res.status(200).json({
     message: "Episode updated successfully",
     episode,
   });
+});
+
+exports.deleteEpisode = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  // 1- Find the episode by ID
+  const episode = await Episode.findById(id);
+  if (!episode) {
+    return next(new ApiError(`No episode for this id ${id}`, 404));
+  }
+
+  // 3- Decrement the episode count in the corresponding playlist season
+  //    - Match the playlist by playlistId
+  //    - Match the correct season by seasonNumber
+  //    - Use $inc to decrease the countOfEpisodes by 1
+  await Playlist.updateOne(
+    { _id: episode.playlistId, "seasons.seasonNumber": episode.seasonNumber },
+    { $inc: { "seasons.$.countOfEpisodes": -1 } }
+  );
+
+  // 4- Delete the episode from the database
+  await Episode.deleteOne({ _id: id });
+
+  res.status(204).send();
 });

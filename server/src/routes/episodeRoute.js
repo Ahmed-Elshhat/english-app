@@ -5,11 +5,15 @@ const {
   createEpisodeValidator,
   getEpisodesValidator,
   getEpisodeValidator,
+  updateEpisodeValidator,
+  deleteEpisodeValidator,
 } = require("../utils/validators/episodeValidator");
 const {
   createEpisode,
   getEpisodes,
   getEpisode,
+  updateEpisode,
+  deleteEpisode,
 } = require("../controllers/episodeController");
 
 router
@@ -20,5 +24,7 @@ router
 router
   .route("/:id")
   .get(getEpisodeValidator, getEpisode)
+  .put(updateEpisodeValidator, updateEpisode)
+  .delete(deleteEpisodeValidator, deleteEpisode);
 
 module.exports = router;

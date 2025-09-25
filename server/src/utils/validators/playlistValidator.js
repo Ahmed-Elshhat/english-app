@@ -115,7 +115,7 @@ exports.getPlaylistsValidator = [
 
 exports.getPlaylistValidator = [
   validateExactFields([], ["id"], []),
-
+  check("id").isMongoId().withMessage("Invalid playlist ID format"),
   validatorMiddleware,
 ];
 
@@ -172,6 +172,11 @@ exports.updatePlaylistValidator = [
     ["id"],
     []
   ),
+  check("id")
+    .notEmpty()
+    .withMessage("The playlist id is required")
+    .isMongoId()
+    .withMessage("Invalid playlist ID format"),
   check("type")
     .optional()
     .isString()
@@ -236,6 +241,10 @@ exports.updatePlaylistValidator = [
 
 exports.deletePlaylistValidator = [
   validateExactFields([], ["id"], []),
-
+  check("id")
+    .notEmpty()
+    .withMessage("The playlist id is required")
+    .isMongoId()
+    .withMessage("Invalid playlist ID format"),
   validatorMiddleware,
 ];
