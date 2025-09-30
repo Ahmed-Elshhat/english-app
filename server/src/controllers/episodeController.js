@@ -34,13 +34,17 @@ exports.createEpisode = asyncHandler(async (req, res, next) => {
     const currentSeason = playlist.seasons.find(
       (season) => season.seasonNumber === seasonNumber
     );
-    console.log(seasonNumber);
-    console.log(typeof seasonNumber);
+
     if (!currentSeason) {
       await session.abortTransaction();
       session.endSession();
       return next(
-        new ApiError(`Season ${seasonNumber} not found in this playlist`, 404)
+        new ApiError("", 404, [
+        {
+          path: "seasonNumber",
+          msg: `Season ${seasonNumber} not found in this playlist`,
+        },
+      ])
       );
     }
 
@@ -122,21 +126,27 @@ exports.updateEpisode = asyncHandler(async (req, res, next) => {
   // 3- Prevent linking an episode to a movie playlist
   if (playlist.type === "movie") {
     return next(
-      new ApiError("Episodes cannot be associated with a movie playlist", 400)
+      new ApiError("", 400, [
+        {
+          path: "playlistId",
+          msg: `Episodes cannot be associated with a movie playlist`,
+        },
+      ])
     );
   }
 
   // 4- Ensure the target season exists in the playlist
-  console.log(playlist.seasons);
   const targetSeason = playlist.seasons.find(
     (s) => s.seasonNumber === targetSeasonNumber
   );
   if (!targetSeason) {
     return next(
-      new ApiError(
-        `Season ${targetSeasonNumber} not found in this playlist`,
-        404
-      )
+      new ApiError("", 404, [
+        {
+          path: "seasonNumber",
+          msg: `Season ${targetSeasonNumber} not found in this playlist`,
+        },
+      ])
     );
   }
 

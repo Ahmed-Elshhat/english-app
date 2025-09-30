@@ -64,3 +64,15 @@ export type PlaylistSchema = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type EpisodeSchema = {
+  _id: string;
+  id: string;
+  title: string;
+  duration: number;
+  playlistId: string;
+  seasonNumber: number;
+  episodeNumber: number;
+  createdAt: Date;
+  updatedAt: Date;
+};

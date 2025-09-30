@@ -1,7 +1,12 @@
 import { FaUser, FaUsers, FaVideo } from "react-icons/fa";
 import { IoMdHome } from "react-icons/io";
-import { RiPlayList2Fill, RiUserAddFill, RiVideoAddLine } from "react-icons/ri";
-import { MdOutlinePlaylistAdd } from "react-icons/md";
+import {
+  RiMovie2Line,
+  RiPlayList2Fill,
+  RiUserAddFill,
+  RiVideoAddLine,
+} from "react-icons/ri";
+import { MdLiveTv, MdOutlinePlaylistAdd } from "react-icons/md";
 
 const SidebarLinks = () => {
   const links = [
@@ -39,6 +44,18 @@ const SidebarLinks = () => {
       name: "Add playlist",
       path: `/dashboard/playlists/add`,
       icon: <MdOutlinePlaylistAdd />,
+      role: ["admin", "employee"],
+    },
+    {
+      name: "Episodes",
+      path: `/dashboard/episodes`,
+      icon: <MdLiveTv />,
+      role: ["admin", "employee"],
+    },
+    {
+      name: "Add episode",
+      path: `/dashboard/episodes/add`,
+      icon: <RiMovie2Line />,
       role: ["admin", "employee"],
     },
     {

@@ -53,7 +53,13 @@ exports.getOne = (Model, populationOpt) =>
     // });
 
     if (populationOpt) {
-      query = query.populate({ path: populationOpt, select: "-__v" });
+      if (Array.isArray(populationOpt)) {
+        query = query.populate(
+          populationOpt.map((field) => ({ path: field, select: "-__v" }))
+        );
+      } else {
+        query = query.populate({ path: populationOpt, select: "-__v" });
+      }
     }
 
     // 2) Execute query
@@ -86,10 +92,16 @@ exports.getAll = (Model, searchKeyWord, populationOpt) =>
       .countDocuments();
     apiFeatures.Paginate(filteredCount);
     if (populationOpt) {
-      apiFeatures.mongooseQuery = apiFeatures.mongooseQuery.populate({
-        path: populationOpt,
-        select: "-__v",
-      });
+      if (Array.isArray(populationOpt)) {
+        apiFeatures.mongooseQuery = apiFeatures.mongooseQuery.populate(
+          populationOpt.map((field) => ({ path: field, select: "-__v" }))
+        );
+      } else {
+        apiFeatures.mongooseQuery = apiFeatures.mongooseQuery.populate({
+          path: populationOpt,
+          select: "-__v",
+        });
+      }
     }
 
     // 6) Execute query

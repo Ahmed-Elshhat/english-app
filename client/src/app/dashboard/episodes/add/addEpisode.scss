@@ -1,0 +1,633 @@
+// .add-playlist {
+//   width: 100%;
+//   display: flex;
+//   justify-content: center;
+//   align-items: flex-start;
+//   padding: 20px;
+//   background: #f9f9f9;
+//   background-size: cover;
+//   min-height: 100vh;
+
+//   .form-container {
+//     padding: 20px;
+//     border-radius: 12px;
+//     width: 100%;
+//     max-width: 700px;
+
+//     h2 {
+//       display: flex;
+//       justify-content: center;
+//       align-items: center;
+//       gap: 10px;
+//       margin-bottom: 20px;
+//       font-size: 1.5rem;
+//       font-weight: 600;
+//       text-align: center;
+//       color: #333;
+//     }
+
+//     form {
+//       display: flex;
+//       flex-direction: column;
+//       gap: 20px;
+
+//       .form-group {
+//         display: flex;
+//         flex-direction: column;
+//         gap: 8px;
+
+//         label {
+//           font-size: 0.95rem;
+//           font-weight: 500;
+//           color: #444;
+//         }
+
+//         input,
+//         textarea,
+//         select {
+//           padding: 10px 12px;
+//           border: 1px solid #ddd;
+//           border-radius: 8px;
+//           font-size: 0.95rem;
+//           outline: none;
+//           transition: 0.2s;
+
+//           &:focus {
+//             border-color: #2a3a47;
+//             box-shadow: 0 0 0 2px rgba(76, 175, 239, 0.2);
+//           }
+//         }
+
+//         textarea {
+//           min-height: 80px;
+//           resize: vertical;
+//         }
+//       }
+
+//       select {
+//         option {
+//           background-color: #2a3a47;
+//           color: white;
+//         }
+//       }
+
+//       .upload-btn {
+//         padding: 10px 16px;
+//         background: #2a3a47;
+//         color: #fff;
+//         border: none;
+//         border-radius: 8px;
+//         border: 1px solid #2a3a47;
+//         font-size: 0.95rem;
+//         font-weight: 500;
+//         cursor: pointer;
+//         transition: 0.2s;
+//         width: fit-content;
+
+//         &:hover {
+//           background: transparent;
+//           color: #2a3a47;
+//         }
+//       }
+
+//       .image-preview {
+//         margin-top: 15px;
+//         position: relative;
+//         display: inline-block;
+//         width: fit-content;
+
+//         img {
+//           width: 150px;
+//           height: 150px;
+//           object-fit: cover;
+//           border-radius: 10px;
+//           border: 1px solid #ddd;
+//           display: block;
+//         }
+
+//         .delete-btn {
+//           position: absolute;
+//           top: -5px;
+//           right: -5px;
+//           background: #ff4d4d;
+//           border: none;
+//           border-radius: 50%;
+//           width: 28px;
+//           height: 28px;
+//           color: #fff;
+//           font-size: 1.2rem;
+//           display: flex;
+//           justify-content: center;
+//           align-items: center;
+//           cursor: pointer;
+//           transition: 0.2s;
+
+//           &:hover {
+//             background: #e60000;
+//           }
+//         }
+//       }
+
+//       .season-inputs {
+//         display: flex;
+//         gap: 10px;
+//         align-items: center;
+//         flex-wrap: wrap;
+
+//         input {
+//           flex: 1;
+//           min-width: 120px;
+//         }
+
+//         button {
+//           padding: 8px 14px;
+//           background: #2a3a47;
+//           color: #fff;
+//           border: none;
+//           border-radius: 8px;
+//           border: 1px solid #2a3a47;
+//           cursor: pointer;
+//           transition: 0.2s;
+//           flex-shrink: 0;
+
+//           &:hover {
+//             background: transparent;
+//             color: #2a3a47;
+//           }
+//         }
+//       }
+
+//       .seasons-list {
+//         margin-top: 10px;
+//         list-style: none;
+//         padding: 0;
+//         display: flex;
+//         flex-direction: column;
+//         gap: 8px;
+
+//         li {
+//           background: #f3f7fc;
+//           padding: 10px 12px;
+//           border-radius: 8px;
+//           display: flex;
+//           justify-content: space-between;
+//           align-items: center;
+//           font-size: 0.95rem;
+//           gap: 10px;
+//           flex-wrap: wrap;
+
+//           .btns {
+//             display: flex;
+//             align-items: center;
+//             gap: 10px;
+//             button {
+//               background: none;
+//               border: none;
+//               color: #ff4d4d;
+//               font-size: 1.2rem;
+//               cursor: pointer;
+//               transition: 0.2s;
+//               color: white;
+//               background-color: #ff4d4d;
+//               padding: 5px 10px;
+//               border-radius: 10px;
+
+//               &:hover {
+//                 background-color: #e60000;
+//               }
+//             }
+//           }
+//         }
+//       }
+
+//       .submit-btn {
+//         padding: 12px;
+//         background: #2a3a47;
+//         color: #fff;
+//         border: none;
+//         border-radius: 10px;
+//         border: 1px solid #2a3a47;
+//         font-size: 1rem;
+//         font-weight: 500;
+//         cursor: pointer;
+//         transition: 0.2s;
+
+//         &:hover {
+//           background: transparent;
+//           color: #2a3a47;
+//         }
+//       }
+//     }
+//   }
+// }
+
+// .error {
+//   color: #e63946;
+//   font-size: 0.9rem;
+//   margin-top: 5px;
+//   font-weight: 500;
+//   animation: fadeIn 0.3s ease-in-out;
+
+//   &::before {
+//     animation: flash 2s ease-in-out infinite;
+//     content: "⚠ ";
+//   }
+// }
+
+// /* ✅ Media Queries */
+// @media (max-width: 768px) {
+//   .add-playlist {
+//     padding: 15px;
+
+//     .form-container {
+//       padding: 15px;
+
+//       h2 {
+//         font-size: 1.3rem;
+//       }
+
+//       form {
+//         gap: 15px;
+
+//         .season-inputs {
+//           flex-direction: column;
+//           align-items: stretch;
+
+//           input {
+//             width: 100%;
+//           }
+
+//           button {
+//             width: 100%;
+//           }
+//         }
+
+//         .submit-btn {
+//           width: 100%;
+//         }
+//       }
+//     }
+//   }
+// }
+
+// @media (max-width: 480px) {
+//   .add-playlist {
+//     .form-container {
+//       h2 {
+//         font-size: 1.1rem;
+//       }
+
+//       form {
+//         .form-group label {
+//           font-size: 0.85rem;
+//         }
+
+//         input,
+//         textarea,
+//         select {
+//           font-size: 0.85rem;
+//         }
+//       }
+//     }
+//   }
+// }
+
+// @keyframes fadeIn {
+//   from {
+//     opacity: 0;
+//     transform: translateY(-3px);
+//   }
+//   to {
+//     opacity: 1;
+//     transform: translateY(0);
+//   }
+// }
+
+// @keyframes flash {
+//   0% {
+//     opacity: 0;
+//   }
+//   50% {
+//     opacity: 1;
+//   }
+//   100% {
+//     opacity: 0;
+//   }
+// }
+
+@use "sass:color";
+
+$primary-color: #1e293b; // غامق شوية
+$bg-color: #0f172a; // خلفية الصفحة
+$text-color: #e2e8f0; // نص فاتح
+$border-color: #334155; // حدود
+
+.add-playlist {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  background: $bg-color;
+  min-height: 100vh;
+  color: $text-color;
+
+  .form-container {
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 700px;
+
+    h2 {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      color: $text-color;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        label {
+          font-size: 0.95rem;
+          font-weight: 500;
+          color: $text-color;
+        }
+
+        input,
+        textarea,
+        select {
+          padding: 10px 12px;
+          border: 1px solid $border-color;
+          border-radius: 8px;
+          font-size: 0.95rem;
+          outline: none;
+          background: $bg-color;
+          color: $text-color;
+          transition: 0.2s;
+
+          &:focus {
+            border-color: #00c896;
+            box-shadow: 0 0 5px #00c89666;
+          }
+        }
+
+        textarea {
+          min-height: 80px;
+          resize: vertical;
+        }
+      }
+
+      select {
+        option {
+          background-color: $primary-color;
+          color: $text-color;
+        }
+      }
+
+      .upload-btn {
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #00c896, #0d89f2, #0044ff);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.2s;
+        width: fit-content;
+      }
+
+      .image-preview {
+        margin-top: 15px;
+        position: relative;
+        display: inline-block;
+        width: fit-content;
+
+        img {
+          width: 150px;
+          height: 150px;
+          object-fit: cover;
+          border-radius: 10px;
+          border: 1px solid $border-color;
+          display: block;
+        }
+
+        .delete-btn {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          background: #f87171;
+          border: none;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          color: #fff;
+          font-size: 1.2rem;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          transition: 0.2s;
+
+          &:hover {
+            background: color.adjust(#f87171, $lightness: -10%);
+          }
+        }
+      }
+
+      .season-inputs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+
+        input {
+          flex: 1;
+          min-width: 120px;
+        }
+
+        button {
+          padding: 8px 14px;
+          background: linear-gradient(135deg, #00c896, #0d89f2, #0044ff);
+          color: #fff;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: 0.2s;
+          flex-shrink: 0;
+        }
+      }
+
+      .seasons-list {
+        margin-top: 10px;
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        li {
+          background: $bg-color;
+          padding: 10px 12px;
+          border-radius: 8px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 0.95rem;
+          gap: 10px;
+          flex-wrap: wrap;
+          border: 1px solid $border-color;
+
+          .btns {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            button {
+              border: none;
+              cursor: pointer;
+              font-size: 0.9rem;
+              color: white;
+              padding: 6px 10px;
+              border-radius: 6px;
+              transition: 0.2s;
+
+              &:first-child {
+                background: #facc15; // Edit
+                color: #000;
+                &:hover {
+                  background: color.adjust(#facc15, $lightness: -10%);
+                }
+              }
+
+              &:last-child {
+                background: #f87171; // Delete
+                &:hover {
+                  background: color.adjust(#f87171, $lightness: -10%);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .submit-btn {
+        padding: 12px;
+        background: linear-gradient(135deg, #00c896, #0d89f2, #0044ff);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+    }
+  }
+}
+
+.error {
+  color: #f87171;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-in-out;
+
+  &::before {
+    animation: flash 2s ease-in-out infinite;
+    content: "⚠ ";
+  }
+}
+
+@media (max-width: 768px) {
+  .add-playlist {
+    padding: 15px;
+
+    .form-container {
+      padding: 15px;
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      form {
+        gap: 15px;
+
+        .season-inputs {
+          flex-direction: column;
+          align-items: stretch;
+
+          input {
+            width: 100%;
+          }
+
+          button {
+            width: 100%;
+          }
+        }
+
+        .submit-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .add-playlist {
+    .form-container {
+      h2 {
+        font-size: 1.1rem;
+      }
+
+      form {
+        .form-group label {
+          font-size: 0.85rem;
+        }
+
+        input,
+        textarea,
+        select {
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

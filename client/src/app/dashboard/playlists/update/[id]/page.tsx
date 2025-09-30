@@ -352,7 +352,9 @@ function UpdatePlaylistPage() {
       {loading && <Loading />}
       <div className="update-playlist">
         <div className="form-container">
-          <h2>Update Playlist <RiPlayList2Fill /></h2>
+          <h2>
+            Update Playlist <RiPlayList2Fill />
+          </h2>
           <form onSubmit={handleSubmit}>
             {/* type */}
             <div className="form-group">
@@ -495,7 +497,7 @@ function UpdatePlaylistPage() {
 
             {/* submit */}
             <button type="submit" className="submit-btn">
-              Add Playlist
+              Update Playlist
             </button>
           </form>
         </div>

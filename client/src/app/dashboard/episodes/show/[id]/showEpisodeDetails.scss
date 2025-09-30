@@ -1,0 +1,188 @@
+.show-episode {
+  background-color: #0f172a;
+  width: 100%;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .episode-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+
+    th,
+    td {
+      color: #e2e8f0;
+      padding: 12px 20px;
+      border: 1px solid #334155;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #00c896, #0d89f2, #0044ff);
+      th {
+        color: #fff;
+      }
+    }
+
+    tbody {
+      tr {
+        background-color: #1e293b;
+        &:nth-child(even) {
+          background-color: #243447;
+        }
+        td {
+          font-weight: 300;
+          &:first-child {
+            font-weight: bold;
+
+            span {
+              background: linear-gradient(135deg, #00c896, #0d89f2, #0044ff);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              color: transparent;
+              width: fit-content;
+            }
+          }
+          a {
+            background-color: #2a3a47;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3px;
+            width: 200px;
+            padding: 5px 10px;
+            border: 1px solid #2a3a47;
+            border-radius: 4px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            &:hover {
+              background-color: transparent;
+              color: #2a3a47;
+            }
+          }
+
+          img {
+            width: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
+
+          .season-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+
+            .season-item {
+              background-color: #2366c3;
+              border: 1px solid #2366c3;
+              color: #e2e8f0;
+              padding: 8px 10px;
+              font-weight: bold;
+              border-radius: 6px;
+              transition: all 0.3s ease-in-out;
+              cursor: pointer;
+              &:hover {
+                background-color: transparent;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px;
+
+    h2 {
+      font-size: 1.2rem;
+    }
+
+    .playlist-table {
+      width: 100%;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      tr {
+        background-color: #1d2937;
+        color: white;
+        display: block;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        th,
+        td {
+          padding: 10px;
+        }
+      }
+
+      thead {
+        background: none;
+        tr {
+          th {
+            display: none;
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          td {
+            display: block;
+            padding: 10px 15px;
+            border: none;
+            border-bottom: 1px solid #ddd;
+            &:first-child {
+              font-weight: bold;
+              border-bottom: 1px solid rgb(209, 205, 205);
+            }
+
+            img {
+              display: block;
+              margin: 0 auto;
+            }
+
+            .season-container {
+              .season-item {
+                background-color: #fafafa;
+                color: #2a3a47;
+                border: 1px solid #fafafa;
+                &:hover {
+                  background-color: transparent;
+                  color: #fafafa;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    h2 {
+      font-size: 1rem;
+    }
+
+    .playlist-table {
+      font-size: 0.8rem;
+    }
+
+    .playlist-table td {
+      padding: 8px;
+    }
+  }
+}

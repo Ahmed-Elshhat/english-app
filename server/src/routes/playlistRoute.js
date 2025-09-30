@@ -44,8 +44,8 @@ router
   .get(getPlaylistsValidator, getPlaylists)
   .post(
     uploadPlaylistImage,
-    resizeImage,
     parseJSON,
+    resizeImage,
     createPlaylistValidator,
     createPlaylist
   );

@@ -216,6 +216,12 @@ function AddPlaylistPage() {
       formData.append("seasons", JSON.stringify(form.seasons));
     }
 
+    console.log("type", form.type)
+    console.log("title", form.title)
+    console.log("description", form.description)
+    console.log("image", form.image)
+    console.log("seasons", JSON.stringify(form.seasons))
+
     try {
       const res = await Axios.post(`${PLAYLISTS}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },

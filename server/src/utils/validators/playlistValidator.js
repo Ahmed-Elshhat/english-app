@@ -91,7 +91,6 @@ exports.getPlaylistsValidator = [
       "sort",
       "fields",
       "type",
-      "sort",
       "keyword",
       "_id",
     ]

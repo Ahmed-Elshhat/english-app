@@ -15,3 +15,6 @@ export const RESET_PASSWORD: string = "/auth/resetPassword";
 
 // playlists
 export const PLAYLISTS: string = "/playlists"
+
+// episodes
+export const EPISODES: string = "/episodes"

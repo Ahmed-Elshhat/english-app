@@ -46,14 +46,20 @@ class ApiFeatures {
     if (this.queryString.keyword) {
       const safeKeyword = escapeRegExp(this.queryString.keyword);
       let query = {};
-      if (modelName === "Playlists") {
+      const searchFieldWithTitleAndDes = [
+        "Playlists",
+        "Videos",
+        "FlashCards",
+        "Quizzes",
+      ];
+      if (searchFieldWithTitleAndDes.includes(modelName)) {
         query.$or = [
           { title: { $regex: safeKeyword, $options: "i" } },
           { description: { $regex: safeKeyword, $options: "i" } },
         ];
-      }else if (modelName === "Episodes") {
+      } else if (modelName === "Episodes") {
         query = { title: { $regex: safeKeyword, $options: "i" } };
-      }/*  else {
+      } /*  else {
         query = { name: { $regex: safeKeyword, $options: "i" } };
       } */
       this.mongooseQuery = this.mongooseQuery.find(query);

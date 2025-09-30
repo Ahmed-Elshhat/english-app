@@ -7,9 +7,9 @@ const mongoose = require("mongoose");
 const Playlist = require("../models/playlistModel");
 const ApiError = require("../utils/apiError");
 const factory = require("./handlersFactory");
-const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
+const { uploadSingleFile } = require("../middlewares/uploadImageMiddleware");
 
-exports.uploadPlaylistImage = uploadSingleImage("image");
+exports.uploadPlaylistImage = uploadSingleFile("image");
 
 // ---------------------- IMAGE PROCESSING ----------------------
 

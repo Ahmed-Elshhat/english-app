@@ -71,7 +71,7 @@ exports.updateEpisodeValidator = [
     .withMessage("Invalid episode ID format")
     .custom(async (value) => {
       const episode = await Episode.findById(value);
-      console.log(episode)
+      console.log(episode);
       if (!episode) {
         throw new Error(`Not found episode with this id: ${value}`);
       }
