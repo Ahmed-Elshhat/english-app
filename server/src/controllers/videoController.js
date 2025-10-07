@@ -242,6 +242,8 @@ exports.parseJSON = asyncHandler(async (req, res, next) => {
   let flashCards = req.body.flashCards;
   let quizzes = req.body.quizzes;
   let excludeIds = req.body.excludeIds;
+  let deleteFlashCards = req.body.deleteFlashCards;
+  let deleteQuizzes = req.body.deleteQuizzes;
 
   // Step 2: Parse flash cards if needed
   if (
@@ -284,7 +286,37 @@ exports.parseJSON = asyncHandler(async (req, res, next) => {
     }
   }
 
-  // Step 4: Continue
+  // Step 5: Parse deleteFlashCards if needed
+  if (
+    deleteFlashCards != null &&
+    deleteFlashCards !== "" &&
+    !Array.isArray(req.body.deleteFlashCards)
+  ) {
+    try {
+      // Convert JSON string to array
+      req.body.deleteFlashCards = JSON.parse(req.body.deleteFlashCards);
+    } catch (error) {
+      // Bad format -> return 400
+      return next(new ApiError("Invalid delete flash cards format.", 400));
+    }
+  }
+
+  // Step 6: Parse deleteQuizzes if needed
+  if (
+    deleteQuizzes != null &&
+    deleteQuizzes !== "" &&
+    !Array.isArray(req.body.deleteQuizzes)
+  ) {
+    try {
+      // Convert JSON string to array
+      req.body.deleteQuizzes = JSON.parse(req.body.deleteQuizzes);
+    } catch (error) {
+      // Bad format -> return 400
+      return next(new ApiError("Invalid delete quizzes format.", 400));
+    }
+  }
+
+  // Step 7: Continue
   next();
 });
 
@@ -780,61 +812,57 @@ exports.getRandomVideos = asyncHandler(async (req, res) => {
   });
 });
 
-// controllers/videoController.js
 exports.updateVideo = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const session = await mongoose.startSession();
   session.startTransaction();
 
-  const uploadedFiles = []; // ملفات جديدة علشان نحذفها لو حصل خطأ
-  const oldFilesToDelete = []; // ملفات قديمة نحذفها بعد الـ commit
+  const uploadedFiles = []; // ملفات جديدة نحذفها لو حصل خطأ
+  const oldFilesToDelete = []; // ملفات فيديو/cover/subtitles القديمة نحذفها بعد الـ commit
+  const filesToDeleteAfterCommit = []; // ملفات فلاش كاردز/كوويز اللي المستخدم طلب حذفها
 
   try {
-    // 1) جلب الفيديو القديم
-    const video = await Video.findById(id).session(session);
-    if (!video) {
-      throw new ApiError(`No video found for id ${id}`, 404);
-    }
-
-    // 2) جلب ملفات الفلاش كاردز والكوイズ القديمة (عشان نحذف صورهم لو اترفعت صور جديدة أو لو تم استبدالهم)
-    const existingFlashCards = await FlashCard.find({ videoId: id }).session(
-      session
-    );
-    const existingQuizzes = await Quiz.find({ videoId: id }).session(session);
-
-    const oldFlashCardImagePaths = existingFlashCards
-      .map((f) =>
-        f.image
-          ? path.join(__dirname, "..", "..", "uploads", "flashCards", f.image)
-          : null
-      )
-      .filter(Boolean);
-
-    const oldQuizImagePaths = existingQuizzes
-      .map((q) =>
-        q.image
-          ? path.join(__dirname, "..", "..", "uploads", "quizzes", q.image)
-          : null
-      )
-      .filter(Boolean);
-
-    // 3) التعامل مع الملفات الجديدة: لو فيه فيديو جديد او subtitle جديد -> تأكد موجود على السيرفر (resizeVideoFiles سبق وكتبها)
-    if (req.body.video) {
-      const videoFileName = req.body.video;
-      const videoPath = path.join(
+    // Helper function
+    const pushIfExists = (fileName, folder) => {
+      if (!fileName) return null;
+      const filePath = path.join(
         __dirname,
         "..",
         "..",
         "uploads",
-        "videos",
-        videoFileName
+        folder,
+        fileName
       );
-      if (!fs.existsSync(videoPath)) {
-        throw new ApiError("Uploaded video file not found on server", 400);
+      if (fs.existsSync(filePath)) {
+        uploadedFiles.push(filePath);
+        return filePath;
       }
-      uploadedFiles.push(videoPath);
+      return null;
+    };
 
-      // حساب المدة من الفيديو الجديد
+    // 1) التعامل مع الملفات الجديدة (فيديو / Subtitles / صور)
+    const videoPath = pushIfExists(req.body.video, "videos");
+    const subtitleEnPath = pushIfExists(req.body.subtitleEn, "subtitles");
+    const subtitleArPath = pushIfExists(req.body.subtitleAr, "subtitles");
+    const videoImagePath = pushIfExists(req.body.videoImage, "videosImages");
+
+    if (Array.isArray(req.body.flashCardsImages)) {
+      req.body.flashCardsImages.forEach((img) =>
+        pushIfExists(img.newName, "flashCards")
+      );
+    }
+    if (Array.isArray(req.body.quizzesImages)) {
+      req.body.quizzesImages.forEach((img) =>
+        pushIfExists(img.newName, "quizzes")
+      );
+    }
+
+    // 2) جلب الفيديو القديم
+    const video = await Video.findById(id).session(session);
+    if (!video) throw new ApiError(`No video found for id ${id}`, 404);
+
+    // حساب مدة الفيديو لو فيه ملف جديد
+    if (videoPath) {
       let durationSeconds;
       try {
         durationSeconds = await getVideoDurationSeconds(videoPath);
@@ -848,67 +876,36 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       req.body.durationFormatted = formatDuration(durationSeconds);
     }
 
-    if (req.body.subtitleEn) {
-      const subtitleEnFileName = req.body.subtitleEn;
-      const subtitleEnPath = path.join(
-        __dirname,
-        "..",
-        "..",
-        "uploads",
-        "subtitles",
-        subtitleEnFileName
-      );
-      if (!fs.existsSync(subtitleEnPath)) {
-        throw new ApiError(
-          "Uploaded video english subtitle file not found on server",
-          400
-        );
-      }
-      uploadedFiles.push(subtitleEnPath);
-    }
-
-    if (req.body.subtitleAr) {
-      const subtitleArFileName = req.body.subtitleAr;
-      const subtitleArPath = path.join(
-        __dirname,
-        "..",
-        "..",
-        "uploads",
-        "subtitles",
-        subtitleArFileName
-      );
-      if (!fs.existsSync(subtitleArPath)) {
-        throw new ApiError(
-          "Uploaded video arabic subtitle file not found on server",
-          400
-        );
-      }
-      uploadedFiles.push(subtitleArPath);
-    }
-
-    // 4) التحقق من الـ playlist/episode/season logic (باستخدام القيم الناتجة بعد التحديث أو القديمة)
-    const newPlaylistId = req.body.playlistId
+    // 3) playlist / episode / season logic
+    const newPlaylistId = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "playlistId"
+    )
       ? req.body.playlistId
       : video.playlistId;
+
     const playlist = await Playlist.findById(newPlaylistId).session(session);
     if (!playlist)
       throw new ApiError(`Playlist not found with id ${newPlaylistId}`, 404);
 
-    // لو الـ playlist نوعه movie وماقدمتش episodeId -> تبقى fine (movie لا يحتاج episode)
-    if (playlist.type === "movie" && req.body.episodeId) {
+    if (
+      playlist.type === "movie" &&
+      Object.prototype.hasOwnProperty.call(req.body, "episodeId")
+    ) {
       throw new ApiError(
         "This playlist is a movie, you cannot attach an episode to it.",
         400
       );
     }
 
-    // لو playlist هو series -> تأكد إن الناتج النهائي للفيديو فيه episodeId
     const resultingEpisodeId = Object.prototype.hasOwnProperty.call(
       req.body,
       "episodeId"
     )
       ? req.body.episodeId
-      : video.episodeId || null;
+      : video.episodeId
+        ? String(video.episodeId)
+        : null;
 
     if (playlist.type === "series" && !resultingEpisodeId) {
       throw new ApiError(
@@ -917,7 +914,6 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       );
     }
 
-    // seasonNumber الناتج بعد التحديث أو القديم
     const resultingSeasonNumber = Object.prototype.hasOwnProperty.call(
       req.body,
       "seasonNumber"
@@ -929,12 +925,11 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       const seasonExists = playlist.seasons?.some(
         (s) => s.seasonNumber === Number(resultingSeasonNumber)
       );
-      if (!seasonExists) {
+      if (!seasonExists)
         throw new ApiError(
           `Season number ${resultingSeasonNumber} does not exist in playlist ${newPlaylistId}`,
           400
         );
-      }
     }
 
     if (resultingEpisodeId) {
@@ -945,12 +940,11 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
           `Episode not found with id ${resultingEpisodeId}`,
           404
         );
-      if (String(episode.playlistId) !== String(newPlaylistId)) {
+      if (String(episode.playlistId) !== String(newPlaylistId))
         throw new ApiError(
           `Episode ${resultingEpisodeId} does not belong to playlist ${newPlaylistId}`,
           400
         );
-      }
       if (
         resultingSeasonNumber &&
         episode.seasonNumber !== Number(resultingSeasonNumber)
@@ -962,7 +956,7 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       }
     }
 
-    // 5) التحقق من uniqueness للفيديو بناءً على playlistId, seasonNumber, episodeId, videoNumber (مع استثناء الفيديو الحالي)
+    // 4) uniqueness check
     const resultingVideoNumber = Object.prototype.hasOwnProperty.call(
       req.body,
       "videoNumber"
@@ -979,30 +973,28 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       _id: { $ne: video._id },
     }).session(session);
 
-    if (duplicateVideo) {
+    if (duplicateVideo)
       throw new ApiError(
         `A video already exists in this playlist with season ${resultingSeasonNumber}, episode ${resultingEpisodeId || "N/A"}, and videoNumber ${resultingVideoNumber}`,
         400
       );
-    }
 
-    // 6) صلاحيات وفحوصات للـ quizzes (نفس ما في create)
-    const quizzes = req.body.quizzes;
-    if (Array.isArray(quizzes) && quizzes.length > 0) {
-      const rightAnswerIsMissing = quizzes.some((quiz) =>
+    // 5) validate quizzes payload
+    const quizzesPayload = req.body.quizzes;
+    if (Array.isArray(quizzesPayload) && quizzesPayload.length > 0) {
+      const rightAnswerIsMissing = quizzesPayload.some((quiz) =>
         quiz.questions?.some((q) => {
           const chars = q.answers?.map((a) => a.character) || [];
           return !chars.includes(q.rightAnswer);
         })
       );
-
       if (rightAnswerIsMissing)
         throw new ApiError(
           "Each quiz question must have its right answer included in the answers list.",
           400
         );
 
-      const hasDuplicateChars = quizzes.some((quiz) =>
+      const hasDuplicateChars = quizzesPayload.some((quiz) =>
         quiz.questions?.some((q) => {
           const chars = q.answers?.map((a) => a.character) || [];
           return new Set(chars).size !== chars.length;
@@ -1012,7 +1004,7 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
         throw new ApiError("Duplicate characters found in quiz answers", 400);
     }
 
-    // 7) mapping images to flashCards/quizzes (validateAndMapImagesToItems موجودة عندك)
+    // 6) validate flashCards/quizzes images
     try {
       const flashRes = validateAndMapImagesToItems({
         imagesArray: req.body.flashCardsImages,
@@ -1037,7 +1029,7 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       throw new ApiError(err.message, 400);
     }
 
-    // 8) تعديل مدة الـ Episode لو المدة اختلفت أو الفيديو اتنقل لحلقة تانية
+    // 7) تعديل مدة الـ Episode
     const oldEpisodeIdStr = video.episodeId ? String(video.episodeId) : null;
     const newEpisodeIdStr = resultingEpisodeId
       ? String(resultingEpisodeId)
@@ -1049,7 +1041,6 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
         : oldDuration
     );
 
-    // لو نقصت المدة من الحلقة القديمة
     if (
       oldEpisodeIdStr &&
       (oldEpisodeIdStr !== newEpisodeIdStr || oldDuration !== newDuration)
@@ -1065,7 +1056,6 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       }
     }
 
-    // لو زادت المدة في الحلقة الجديدة
     if (
       newEpisodeIdStr &&
       (oldEpisodeIdStr !== newEpisodeIdStr || oldDuration !== newDuration)
@@ -1078,16 +1068,15 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       }
     }
 
-    // 9) سجّل التغييرات في مستند الفيديو (لكن لا تمسح الملفات القديمة هنا — نخزنها للحذف بعد commit)
-    // حقول بسيطة
-    if (req.body.title) video.title = req.body.title;
-    if (req.body.description) video.description = req.body.description;
+    // 8) تحديث الفيديو نفسه
+    if (Object.prototype.hasOwnProperty.call(req.body, "title"))
+      video.title = req.body.title;
+    if (Object.prototype.hasOwnProperty.call(req.body, "description"))
+      video.description = req.body.description;
 
-    // مدة وفورمات (لو اتحددت - لو مش محددة نخلي القديمة)
     video.duration = newDuration;
     video.durationFormatted = formatDuration(newDuration);
 
-    // playlist / season / episode / videoNumber updates
     video.playlistId = newPlaylistId;
     video.seasonNumber = resultingSeasonNumber
       ? Number(resultingSeasonNumber)
@@ -1095,9 +1084,8 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
     video.episodeId = resultingEpisodeId || null;
     video.videoNumber = resultingVideoNumber;
 
-    // ملفات: لو فيه فيديو جديد/صورة جديدة/subtitles جديدة -> استبدل وحفظ القديم للمسح لاحقًا
-    if (req.body.videoImage) {
-      if (video.image) {
+    if (Object.prototype.hasOwnProperty.call(req.body, "videoImage")) {
+      if (video.image)
         oldFilesToDelete.push(
           path.join(
             __dirname,
@@ -1108,21 +1096,19 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
             video.image
           )
         );
-      }
       video.image = req.body.videoImage;
     }
 
-    if (req.body.video) {
-      if (video.video) {
+    if (Object.prototype.hasOwnProperty.call(req.body, "video")) {
+      if (video.video)
         oldFilesToDelete.push(
           path.join(__dirname, "..", "..", "uploads", "videos", video.video)
         );
-      }
       video.video = req.body.video;
     }
 
-    if (req.body.subtitleEn) {
-      if (video.subtitleEn) {
+    if (Object.prototype.hasOwnProperty.call(req.body, "subtitleEn")) {
+      if (video.subtitleEn)
         oldFilesToDelete.push(
           path.join(
             __dirname,
@@ -1133,12 +1119,11 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
             video.subtitleEn
           )
         );
-      }
       video.subtitleEn = req.body.subtitleEn;
     }
 
-    if (req.body.subtitleAr) {
-      if (video.subtitleAr) {
+    if (Object.prototype.hasOwnProperty.call(req.body, "subtitleAr")) {
+      if (video.subtitleAr)
         oldFilesToDelete.push(
           path.join(
             __dirname,
@@ -1149,23 +1134,51 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
             video.subtitleAr
           )
         );
-      }
       video.subtitleAr = req.body.subtitleAr;
     }
 
-    // 10) تحديث قاعدة البيانات: حفظ الفيديو أولاً
     await video.save({ session });
 
-    // 11) استبدال الـ flashCards & quizzes لو بعتها
+    // 9) إضافة flashCards جديدة
     if (Array.isArray(req.body.flashCards) && req.body.flashCards.length > 0) {
       const flashCardsWithVideo = req.body.flashCards.map((fc) => ({
         ...fc,
         videoId: video._id,
       }));
-      // نضيف الجديد من غير ما نحذف القديم
       await FlashCard.insertMany(flashCardsWithVideo, { session });
     }
 
+    // 10) حذف flashCards
+    if (
+      Array.isArray(req.body.deleteFlashCards) &&
+      req.body.deleteFlashCards.length > 0
+    ) {
+      const flashCardsToDelete = await FlashCard.find({
+        _id: { $in: req.body.deleteFlashCards },
+        videoId: video._id,
+      }).session(session);
+
+      if (flashCardsToDelete.length !== req.body.deleteFlashCards.length) {
+        throw new ApiError(
+          "Some flashCard IDs provided do not exist or do not belong to this video",
+          400
+        );
+      }
+
+      flashCardsToDelete.forEach((fc) => {
+        if (fc.image)
+          filesToDeleteAfterCommit.push(
+            path.join(__dirname, "..", "..", "uploads", "flashCards", fc.image)
+          );
+      });
+
+      await FlashCard.deleteMany({
+        _id: { $in: req.body.deleteFlashCards },
+        videoId: video._id,
+      }).session(session);
+    }
+
+    // 11) إضافة quizzes جديدة
     if (Array.isArray(req.body.quizzes) && req.body.quizzes.length > 0) {
       const quizzesWithVideo = req.body.quizzes.map((qz) => ({
         ...qz,
@@ -1174,104 +1187,200 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       await Quiz.insertMany(quizzesWithVideo, { session });
     }
 
-    // 12) commit transaction
+    // 12) حذف quizzes
+    if (
+      Array.isArray(req.body.deleteQuizzes) &&
+      req.body.deleteQuizzes.length > 0
+    ) {
+      const quizzesToDelete = await Quiz.find({
+        _id: { $in: req.body.deleteQuizzes },
+        videoId: video._id,
+      }).session(session);
+
+      if (quizzesToDelete.length !== req.body.deleteQuizzes.length) {
+        throw new ApiError(
+          "Some quiz IDs provided do not exist or do not belong to this video",
+          400
+        );
+      }
+
+      quizzesToDelete.forEach((qz) => {
+        if (qz.image)
+          filesToDeleteAfterCommit.push(
+            path.join(__dirname, "..", "..", "uploads", "quizzes", qz.image)
+          );
+      });
+
+      await Quiz.deleteMany({
+        _id: { $in: req.body.deleteQuizzes },
+        videoId: video._id,
+      }).session(session);
+    }
+
+    // 13) commit
     await session.commitTransaction();
     session.endSession();
 
-    // 13) بعد ما الـ DB تحفظ بنجاح: امسح الملفات القديمة اللي سجلناها (safe delete)
-    oldFilesToDelete.forEach((filePath) => {
-      try {
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      } catch (err) {
-        console.error(`Failed to delete old file ${filePath}: ${err.message}`);
-      }
-    });
+    // 14) حذف الملفات القديمة بعد الـ commit
+    await Promise.all(
+      oldFilesToDelete.map(async (filePath) => {
+        try {
+          if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+        } catch (err) {
+          console.error(
+            `Failed to delete old file ${filePath}: ${err.message}`
+          );
+        }
+      })
+    );
 
-    // امسح صور الفلاش كاردز/الكوイズ القديمة (لو تم استبدالهم)
-    oldFlashCardImagePaths.forEach((p) => {
-      try {
-        if (fs.existsSync(p)) fs.unlinkSync(p);
-      } catch (err) {
-        console.error(
-          `Failed to delete old flashCard image ${p}: ${err.message}`
-        );
-      }
-    });
-    oldQuizImagePaths.forEach((p) => {
-      try {
-        if (fs.existsSync(p)) fs.unlinkSync(p);
-      } catch (err) {
-        console.error(`Failed to delete old quiz image ${p}: ${err.message}`);
-      }
-    });
+    await Promise.all(
+      filesToDeleteAfterCommit.map(async (filePath) => {
+        try {
+          if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+        } catch (err) {
+          console.error(`Failed to delete file ${filePath}: ${err.message}`);
+        }
+      })
+    );
 
-    // 14) جهِّز الـ subtitle JSON للـ response (لو موجودة)
-    let subtitleEnJSON = null;
-    let subtitleArJSON = null;
-
+    // 15) جلب الفيديو النهائي
     const finalVideo = await Video.findById(video._id)
       .populate("flashCards")
       .populate("quizzes");
 
+    let subtitleEnJSON = null;
+    let subtitleArJSON = null;
+
     try {
-      const subtitleEnFile = finalVideo.subtitleEn || null;
-      if (subtitleEnFile) {
-        const subtitleEnPath = path.join(
+      if (finalVideo.subtitleEn) {
+        const videoSubtitleEnPath = path.join(
           __dirname,
           "..",
           "..",
           "uploads",
           "subtitles",
-          subtitleEnFile
+          finalVideo.subtitleEn
         );
-        if (fs.existsSync(subtitleEnPath))
-          subtitleEnJSON = parseSubtitleFile(subtitleEnPath);
+        if (fs.existsSync(videoSubtitleEnPath))
+          subtitleEnJSON = parseSubtitleFile(videoSubtitleEnPath);
       }
     } catch (err) {
-      // لا نفشل العملية عشان مشكلة في الـ parse
       console.warn("Failed to parse subtitleEn:", err.message);
     }
 
     try {
-      const subtitleArFile = finalVideo.subtitleAr || null;
-      if (subtitleArFile) {
-        const subtitleArPath = path.join(
+      if (finalVideo.subtitleAr) {
+        const videoSubtitleArPath = path.join(
           __dirname,
           "..",
           "..",
           "uploads",
           "subtitles",
-          subtitleArFile
+          finalVideo.subtitleAr
         );
-        if (fs.existsSync(subtitleArPath))
-          subtitleArJSON = parseSubtitleFile(subtitleArPath);
+        if (fs.existsSync(videoSubtitleArPath))
+          subtitleArJSON = parseSubtitleFile(videoSubtitleArPath);
       }
     } catch (err) {
       console.warn("Failed to parse subtitleAr:", err.message);
     }
 
-    // 15) ردّ النتيجة
     return res.status(200).json({
       data: finalVideo,
       subtitleEnJSON,
       subtitleArJSON,
     });
   } catch (err) {
-    // Abort + end session
     await session.abortTransaction();
     session.endSession();
 
-    // لو حصل خطأ نمسح أي ملفات جديدة تم رفعها (uploadedFiles) لأننا لم نستخدمها
-    uploadedFiles.forEach((filePath) => {
-      try {
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      } catch (error) {
-        console.error(
-          `Failed to delete uploaded file ${filePath}: ${error.message}`
-        );
-      }
-    });
+    // حذف الملفات الجديدة اللي اترفعت لكن فشلنا
+    await Promise.all(
+      uploadedFiles.map(async (filePath) => {
+        try {
+          if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+        } catch (error) {
+          console.error(
+            `Failed to delete uploaded file ${filePath}: ${error.message}`
+          );
+        }
+      })
+    );
 
     return next(err);
+  }
+});
+
+exports.deleteVideo = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const video = await Video.findById(id).session(session);
+
+    if (!video) {
+      await session.abortTransaction();
+      session.endSession();
+      return next(new ApiError(`No video for this id ${id}`, 404));
+    }
+
+    // حذف الفيديو نفسه
+    await Video.findByIdAndDelete(id).session(session);
+
+    // حذف ملفات الفيديو والصورة
+    if (video.image) {
+      const oldImagePath = path.join(
+        __dirname,
+        `../../uploads/videosImages/${video.image}`
+      );
+      if (fs.existsSync(oldImagePath)) await fs.promises.unlink(oldImagePath);
+    }
+    if (video.video) {
+      const oldVideoPath = path.join(
+        __dirname,
+        `../../uploads/videos/${video.video}`
+      );
+      if (fs.existsSync(oldVideoPath)) await fs.promises.unlink(oldVideoPath);
+    }
+
+    // حذف FlashCards المرتبطة بالفيديو
+    const flashcards = await FlashCard.find({ videoId: id }).session(session);
+    await Promise.all(
+      flashcards.map(async (card) => {
+        if (card.image) {
+          const imagePath = path.join(
+            __dirname,
+            `../../uploads/flashCards/${card.image}`
+          );
+          if (fs.existsSync(imagePath)) await fs.promises.unlink(imagePath);
+        }
+        await FlashCard.findByIdAndDelete(card._id).session(session);
+      })
+    );
+
+    // حذف Quizzes المرتبطة بالفيديو
+    const quizzes = await Quiz.find({ videoId: id }).session(session);
+    await Promise.all(
+      quizzes.map(async (quiz) => {
+        if (quiz.image) {
+          const imagePath = path.join(
+            __dirname,
+            `../../uploads/quizzes/${quiz.image}`
+          );
+          if (fs.existsSync(imagePath)) await fs.promises.unlink(imagePath);
+        }
+        await Quiz.findByIdAndDelete(quiz._id).session(session);
+      })
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+    res.status(204).send();
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    return next(error);
   }
 });

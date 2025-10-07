@@ -4,12 +4,16 @@ const {
   getFlashCard,
   getRandomFlashCards,
   deleteFlashCard,
+  updateFlashCard,
+  resizeImage,
+  uploadFlashCardImage,
 } = require("../controllers/flashCardController");
 const {
   getFlashCardsValidator,
   getFlashCardValidator,
   getRandomFlashCardsValidator,
   deleteFlashCardValidator,
+  updateFlashCardValidator,
 } = require("../utils/validators/flashCardValidator");
 
 const router = express.Router();
@@ -20,6 +24,12 @@ router.get("/", getFlashCardsValidator, getFlashCards);
 
 router
   .route("/:id")
+  .put(
+    uploadFlashCardImage,
+    updateFlashCardValidator,
+    resizeImage,
+    updateFlashCard
+  )
   .get(getFlashCardValidator, getFlashCard)
   .delete(deleteFlashCardValidator, deleteFlashCard);
 

@@ -7,6 +7,7 @@ import {
   RiVideoAddLine,
 } from "react-icons/ri";
 import { MdLiveTv, MdOutlinePlaylistAdd } from "react-icons/md";
+import { AiOutlineUsergroupAdd } from "react-icons/ai";
 
 const SidebarLinks = () => {
   const links = [
@@ -20,6 +21,12 @@ const SidebarLinks = () => {
       name: "Users",
       path: `/dashboard/users`,
       icon: <FaUsers />,
+      role: ["admin"],
+    },
+    {
+      name: "Add user",
+      path: `/dashboard/users/add`,
+      icon: <AiOutlineUsergroupAdd />,
       role: ["admin"],
     },
     {

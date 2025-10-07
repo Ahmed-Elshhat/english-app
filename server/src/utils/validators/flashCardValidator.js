@@ -2,6 +2,7 @@ const { check, body } = require("express-validator");
 const mongoose = require("mongoose");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const { validateExactFields } = require("../validateFields");
+const Video = require("../../models/videoModel");
 
 exports.getFlashCardsValidator = [
   validateExactFields(
@@ -62,6 +63,87 @@ exports.getRandomFlashCardsValidator = [
       throw new Error(
         "flashCardsSize must be a number or a numeric string without spaces or letters"
       );
+    }),
+  validatorMiddleware,
+];
+
+exports.updateFlashCardValidator = [
+  validateExactFields(
+    [
+      "title",
+      "description",
+      "flashCardNumber",
+      "image",
+      "word",
+      "wordType",
+      "example",
+      "explain",
+      "videoId",
+    ],
+    ["id"],
+    []
+  ),
+  check("id")
+    .notEmpty()
+    .withMessage("The flash card id is required")
+    .isMongoId()
+    .withMessage("Invalid flash card ID format"),
+  body("title")
+    .optional()
+    .isString()
+    .withMessage("Flash card title must be a string")
+    .isLength({ min: 3, max: 70 })
+    .withMessage("Flash card title must be between 3 and 70 characters"),
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("Flash card description must be a string")
+    .isLength({ min: 3, max: 70 })
+    .withMessage("Flash card description must be between 3 and 70 characters"),
+  body("flashCardNumber")
+    .optional()
+    .isNumeric()
+    .withMessage("Flash card number must be a number"),
+  check("image").custom((value, { req }) => {
+    if (!req.file) {
+      throw new Error("The flash card image is required");
+    }
+    return true;
+  }),
+  body("word")
+    .optional()
+    .isString()
+    .withMessage("Flash card word must be a string")
+    .isLength({ min: 2, max: 20 })
+    .withMessage("Flash card word must be between 2 and 20 characters"),
+  body("wordType")
+    .optional()
+    .isString()
+    .withMessage("Flash card word type must be a string")
+    .isLength({ min: 2, max: 40 })
+    .withMessage("Flash card word type must be between 2 and 40 characters"),
+  body("example")
+    .optional()
+    .isString()
+    .withMessage("Flash card example must be a string")
+    .isLength({ min: 5, max: 200 })
+    .withMessage("Flash card example must be between 5 and 200 characters"),
+  body("explain")
+    .optional()
+    .isString()
+    .withMessage("Flash card explain must be a string")
+    .isLength({ min: 5, max: 200 })
+    .withMessage("Flash card explain must be between 5 and 200 characters"),
+  body("videoId")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid video ID format")
+    .custom(async (value) => {
+      const video = await Video.findById(value);
+      if (!video) {
+        throw new Error(`Not found video with this id: ${value || ""}`);
+      }
+      return true;
     }),
   validatorMiddleware,
 ];

@@ -2,9 +2,35 @@ const asyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
+const sharp = require("sharp");
 const FlashCard = require("../models/flashCardModel");
 const factory = require("./handlersFactory");
 const ApiError = require("../utils/apiError");
+const { uploadSingleFile } = require("../middlewares/uploadImageMiddleware");
+
+exports.uploadFlashCardImage = uploadSingleFile("image");
+
+exports.resizeImage = asyncHandler(async (req, res, next) => {
+  // Step 1: Create a unique filename for the uploaded image
+  const fileName = `flashCard-${uuidv4()}-${Date.now()}.jpeg`;
+
+  // Step 2: If an image file was uploaded, resize & save it
+  if (req.file) {
+    // Process buffer -> resize -> convert -> save file
+    await sharp(req.file.buffer)
+      .resize(600, 600)
+      .toFormat("jpeg")
+      .jpeg({ quality: 100 })
+      .toFile(`uploads/flashCards/${fileName}`);
+
+    // Step 3: Attach filename to req.body so create/update controller can save it to DB
+    req.body.image = fileName; // Save filename for DB
+  }
+
+  // Step 4: Continue
+  next();
+});
 
 exports.getFlashCards = factory.getAll(FlashCard, "FlashCards");
 exports.getFlashCard = factory.getOne(FlashCard);
@@ -65,6 +91,153 @@ exports.getRandomFlashCards = asyncHandler(async (req, res) => {
     remainingPages,
     flashCards: formatted,
   });
+});
+
+exports.updateFlashCard = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const image = req.body.image;
+
+  let imagePath = null;
+  if (image) {
+    imagePath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "uploads",
+      "flashCards",
+      image
+    );
+    if (!fs.existsSync(imagePath)) {
+      return next(new ApiError("Uploaded image not found", 404));
+    }
+  }
+
+  const flashCard = await FlashCard.findById(id);
+  if (!flashCard) {
+    return next(new ApiError("flash card not found", 404));
+  }
+
+  const oldImagePath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "uploads",
+    "flashCards",
+    flashCard.image
+  );
+
+  const flashCardUpdated = await FlashCard.findByIdAndUpdate(id, req.body, {
+    new: true,
+  });
+
+  try {
+    if (fs.existsSync(oldImagePath)) await fs.promises.unlink(oldImagePath);
+  } catch (error) {
+    console.error(
+      `Failed to delete uploaded file ${oldImagePath}: ${error.message}`
+    );
+  }
+
+  res.status(200).json({ data: flashCardUpdated });
+});
+
+exports.updateFlashCard = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const newImage = req.body.image;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  let newImagePath = null;
+
+  try {
+    // إذا فيه صورة جديدة، تحقق إنها موجودة على الـ disk
+    if (newImage) {
+      newImagePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "uploads",
+        "flashCards",
+        newImage
+      );
+      if (!fs.existsSync(newImagePath)) {
+        throw new ApiError("Uploaded image not found", 404);
+      }
+    }
+
+    // جلب الفلاش كارد داخل الـ session
+    const flashCard = await FlashCard.findById(id).session(session);
+    if (!flashCard) {
+      throw new ApiError("Flash card not found", 404);
+    }
+
+    const videoId = req.body.videoId ? req.body.videoId : flashCard.videoId;
+    const flashCardNumber = req.body.flashCardNumber
+      ? req.body.flashCardNumber
+      : flashCard.flashCardNumber;
+
+    const duplicateFlashCard = await FlashCard.findOne({
+      videoId,
+      flashCardNumber,
+      _id: { $ne: flashCard._id },
+    }).session(session);
+
+    if (duplicateFlashCard)
+      throw new ApiError(
+        `Flash card number ${flashCardNumber} already exists for this video.`,
+        400
+      );
+
+    // تحديث الفلاش كارد
+    const flashCardUpdated = await FlashCard.findByIdAndUpdate(id, req.body, {
+      new: true,
+      session,
+    });
+
+    const oldImagePath = flashCard.image
+      ? path.join(
+          __dirname,
+          "..",
+          "..",
+          "uploads",
+          "flashCards",
+          flashCard.image
+        )
+      : null;
+
+    // حذف الصورة القديمة إذا موجودة ومختلفة عن الجديدة
+    if (
+      oldImagePath &&
+      flashCard.image !== newImage &&
+      fs.existsSync(oldImagePath)
+    ) {
+      await fs.promises.unlink(oldImagePath);
+    }
+
+    // لو كل حاجة تمام، commit
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({ data: flashCardUpdated });
+  } catch (error) {
+    // لو حصل أي خطأ قبل commit -> rollback DB
+    await session.abortTransaction();
+    session.endSession();
+
+    // لو فيه صورة جديدة تم رفعها على القرص، نحذفها
+    if (newImagePath && fs.existsSync(newImagePath)) {
+      try {
+        await fs.promises.unlink(newImagePath);
+      } catch (err) {
+        console.error(
+          `Failed to delete new image after rollback: ${err.message}`
+        );
+      }
+    }
+
+    return next(error);
+  }
 });
 
 /**

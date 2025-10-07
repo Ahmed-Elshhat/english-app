@@ -2,9 +2,35 @@ const asyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
+const sharp = require("sharp");
 const Quiz = require("../models/quizModel");
 const factory = require("./handlersFactory");
 const ApiError = require("../utils/apiError");
+const { uploadSingleFile } = require("../middlewares/uploadImageMiddleware");
+
+exports.uploadQuizImage = uploadSingleFile("image");
+
+exports.resizeImage = asyncHandler(async (req, res, next) => {
+  // Step 1: Create a unique filename for the uploaded image
+  const fileName = `quiz-${uuidv4()}-${Date.now()}.jpeg`;
+
+  // Step 2: If an image file was uploaded, resize & save it
+  if (req.file) {
+    // Process buffer -> resize -> convert -> save file
+    await sharp(req.file.buffer)
+      .resize(600, 600)
+      .toFormat("jpeg")
+      .jpeg({ quality: 100 })
+      .toFile(`uploads/quizzes/${fileName}`);
+
+    // Step 3: Attach filename to req.body so create/update controller can save it to DB
+    req.body.image = fileName; // Save filename for DB
+  }
+
+  // Step 4: Continue
+  next();
+});
 
 exports.getQuizzes = factory.getAll(Quiz, "Quizzes");
 exports.getQuiz = factory.getOne(Quiz);
@@ -65,6 +91,122 @@ exports.getRandomQuizzes = asyncHandler(async (req, res) => {
     remainingPages,
     quizzes: formatted,
   });
+});
+
+exports.updateQuiz = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const newImage = req.body.image;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  let newImagePath = null;
+
+  try {
+    // إذا فيه صورة جديدة، تحقق إنها موجودة على الـ disk
+    if (newImage) {
+      newImagePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "uploads",
+        "quizzes",
+        newImage
+      );
+      if (!fs.existsSync(newImagePath)) {
+        throw new ApiError("Uploaded image not found", 404);
+      }
+    }
+
+    const quiz = await Quiz.findById(id).session(session);
+    if (!quiz) {
+      throw new ApiError("Quiz not found", 404);
+    }
+
+    // ==== validation for quizzes right answer is exist in answers characters ====
+
+    const rightAnswerIsExist = quiz.questions?.some((q) => {
+      const chars = q.answers?.map((a) => a.character) || [];
+      return !chars.includes(q.rightAnswer);
+    });
+
+    if (rightAnswerIsExist) {
+      throw new ApiError(
+        "Each quiz question must have its right answer included in the answers list.",
+        400
+      );
+    }
+
+    // ==== validation for quizzes answers uniqueness ====
+
+    const hasDuplicateChars = quiz.questions?.some((q) => {
+      const chars = q.answers?.map((a) => a.character) || [];
+      return new Set(chars).size !== chars.length; // لو في تكرار يرجع true
+    });
+
+    if (hasDuplicateChars) {
+      throw new ApiError("Duplicate characters found in quiz answers", 400);
+    }
+
+    const videoId = req.body.videoId ? req.body.videoId : quiz.videoId;
+    const quizNumber = req.body.quizNumber
+      ? req.body.quizNumber
+      : quiz.quizNumber;
+
+    const duplicateQuiz = await Quiz.findOne({
+      videoId,
+      quizNumber,
+      _id: { $ne: quiz._id },
+    }).session(session);
+
+    if (duplicateQuiz)
+      throw new ApiError(
+        `Quiz number ${quizNumber} already exists for this video.`,
+        400
+      );
+
+    // تحديث الفلاش كارد
+    const quizUpdated = await Quiz.findByIdAndUpdate(id, req.body, {
+      new: true,
+      session,
+    });
+
+    const oldImagePath = quiz.image
+      ? path.join(__dirname, "..", "..", "uploads", "quizzes", quiz.image)
+      : null;
+
+    // حذف الصورة القديمة إذا موجودة ومختلفة عن الجديدة
+    if (
+      oldImagePath &&
+      quiz.image !== newImage &&
+      fs.existsSync(oldImagePath)
+    ) {
+      await fs.promises.unlink(oldImagePath);
+    }
+
+    // لو كل حاجة تمام، commit
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({ data: quizUpdated });
+  } catch (error) {
+    // لو حصل أي خطأ قبل commit -> rollback DB
+    await session.abortTransaction();
+    session.endSession();
+
+    // لو فيه صورة جديدة تم رفعها على القرص، نحذفها
+    if (newImagePath && fs.existsSync(newImagePath)) {
+      try {
+        await fs.promises.unlink(newImagePath);
+      } catch (err) {
+        console.error(
+          `Failed to delete new image after rollback: ${err.message}`
+        );
+      }
+    }
+
+    return next(error);
+  }
 });
 
 /**

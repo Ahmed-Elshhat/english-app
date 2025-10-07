@@ -294,12 +294,12 @@ $bg-color: #0f172a; // خلفية الصفحة (غامقة جدا)
 $text-color: #e2e8f0; // نص فاتح (قريب من Tailwind slate-200)
 $border-color: #334155; // لون الحدود غامق فاتح شوية
 
-.Playlists {
+.Users {
   position: relative;
   width: 100%;
   overflow-x: hidden;
 
-  .playlists-container {
+  .users-container {
     background-color: $bg-color;
     color: $text-color;
     width: 100%;

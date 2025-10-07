@@ -1,5 +1,5 @@
 import Sidebar from "@/components/Dashboard/Sidebar/Sidebar";
-import "./dashboard.scss";
+import "./layout.scss";
 
 export default function DashboardLayout({
   children,
@@ -7,7 +7,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="Dashboard">
+    <div className="Dashboard_Layout">
       <Sidebar />
       {children}
     </div>

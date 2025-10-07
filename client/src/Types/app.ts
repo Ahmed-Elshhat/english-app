@@ -23,21 +23,12 @@ export type UserSchema = {
   name: string;
   email: string;
   role: string;
-  phone: string;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
-  addresses: [];
+  points: number;
   id: string;
   _id: string;
-  startShift: {
-    hour: number;
-    minutes: number;
-  };
-  endShift: {
-    hour: number;
-    minutes: number;
-  };
 };
 
 // getUser Context

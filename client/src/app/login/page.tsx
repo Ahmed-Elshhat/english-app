@@ -1,14 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import "./login.scss";
-// import { useLocation } from "react-router-dom";
 import Link from "next/link";
 import Cookie from "cookie-universal";
 import axios from "axios";
 import { BASE_URL, LOGIN } from "../../Api/Api";
 import { LoginFormState } from "../../Types/app";
 import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
-// import { useAppSelector } from "../../Redux/app/hooks";
 
 function Login() {
   const [form, setForm] = useState<LoginFormState>({
@@ -19,10 +17,6 @@ function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ msg: string; path?: string }[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  // const location = useLocation();
-
-  // const redirectToReferrer = location.state?.path || "/";
-  const redirectToReferrer = "/";
 
   useEffect(() => {
     if (isSubmitted) {
@@ -75,13 +69,13 @@ function Login() {
       const res = await axios.post(`${BASE_URL}${LOGIN}`, form);
       if (res.status === 200) {
         const token = res.data.token;
-        cookies.set("ECT", token, {
+        cookies.set("ARL", token, {
           path: "/",
           maxAge: 60 * 60 * 24 * 90,
           secure: false,
           sameSite: "lax",
         });
-        window.location.href = redirectToReferrer;
+        window.location.href = "/playlists/series";
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {

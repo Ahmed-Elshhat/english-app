@@ -5,12 +5,16 @@ const {
   getQuizzesValidator,
   getQuizValidator,
   deleteQuizValidator,
+  updateQuizValidator,
 } = require("../utils/validators/quizValidator");
 const {
   getRandomQuizzes,
   getQuizzes,
   getQuiz,
   deleteQuiz,
+  updateQuiz,
+  resizeImage,
+  uploadQuizImage,
 } = require("../controllers/quizController");
 
 const router = express.Router();
@@ -21,6 +25,7 @@ router.get("/", getQuizzesValidator, getQuizzes);
 
 router
   .route("/:id")
+  .put(uploadQuizImage, updateQuizValidator, resizeImage, updateQuiz)
   .get(getQuizValidator, getQuiz)
   .delete(deleteQuizValidator, deleteQuiz);
 

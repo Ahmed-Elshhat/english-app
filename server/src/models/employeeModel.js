@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema(
+const employeeSchema = new mongoose.Schema(
   {
     accessToken: String,
     facebookAccessToken: String,
@@ -23,23 +23,28 @@ const userSchema = new mongoose.Schema(
       required: [true, "password is required"],
       minlength: [6, "Too short password"],
     },
-    points: Number,
+    startShift: {
+      hour: Number,
+      minutes: Number,
+    },
+    endShift: {
+      hour: Number,
+      minutes: Number,
+    },
     passwordChangedAt: Date,
     passwordResetCode: String,
     passwordResetExpires: Date,
     passwordResetVerified: Boolean,
     emailResetCode: String,
     emailResetExpires: Date,
-
     newEmail: {
       type: String,
       lowercase: true,
     },
-
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ["employee"],
+      default: "employee",
     },
     active: {
       type: Boolean,
@@ -49,13 +54,13 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
+employeeSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   // Hashing user password
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
-const UserModel = mongoose.model("User", userSchema);
+const EmployeeModel = mongoose.model("Employee", employeeSchema);
 
-module.exports = UserModel;
+module.exports = EmployeeModel;

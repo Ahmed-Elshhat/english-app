@@ -4,21 +4,57 @@ const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const ApiError = require("../utils/apiError");
 const User = require("../models/userModel");
+const SignupTracker = require("../models/signupTrackerModel");
 const createToken = require("../utils/createToken");
 const sendEmail = require("../utils/sendEmail");
+const Employee = require("../models/employeeModel");
 
 // @desc    Signup
 // @route   POST /api/v1/auth/signup
 // @access  Public
 exports.signup = asyncHandler(async (req, res, next) => {
+  let ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "")
+    .split(",")[0]
+    .trim();
+
+  ip = ip.replace("::ffff:", ""); // يحول IPv6 إلى IPv4
+  if (ip === "::1") ip = "127.0.0.1";
+
+  const previousSignup = await SignupTracker.findOne({
+    $or: [{ ipAddress: ip }, { email: req.body.email }],
+  });
+
+  const shouldGiveTrialPoints = !previousSignup;
   // 1- Create user
   const user = await User.create({
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
+    points: shouldGiveTrialPoints ? 5 : 0,
   });
+
+  if (shouldGiveTrialPoints) {
+    await SignupTracker.create({
+      email: req.body.email,
+      ipAddress: ip,
+    });
+  } else {
+    let save = false;
+    if (previousSignup.email == null) {
+      previousSignup.email = req.body.email;
+      save = true;
+    }
+    if (previousSignup.ipAddress == null) {
+      previousSignup.ipAddress = ip;
+      save = true;
+    }
+
+    if (save) {
+      await previousSignup.save();
+    }
+  }
   // 2- Generate token
-  const token = createToken(user._id);
+  const token = createToken({ userId: user._id, role: "user" });
 
   const userObject = user.toObject();
   userObject.id = user._id;
@@ -36,14 +72,18 @@ exports.signup = asyncHandler(async (req, res, next) => {
 exports.login = asyncHandler(async (req, res, next) => {
   // 1) check if password and email in the body (validation)
   // 2) check if user exist & check if password is correct
-  const user = await User.findOne({ email: req.body.email });
+  let user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    user = await Employee.findOne({ email: req.body.email });
+  }
+
   if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
     return next(new ApiError("Incorrect email or password", 401));
   }
   // 3) Generate token
-  const token = createToken(user._id);
-  // 4) Send response to client side
+  const token = createToken({ userId: user._id, role: user.role });
 
+  // 4) Send response to client side
   const userObject = user.toObject();
   userObject.id = user._id;
   delete userObject.password;
@@ -58,9 +98,34 @@ exports.login = asyncHandler(async (req, res, next) => {
 // @access  Public
 exports.googleCallback = asyncHandler(async (req, res) => {
   const user = req.user;
-  const token = createToken(user.id);
+  const token = createToken({ userId: user.id, role: user.role });
 
-  res.cookie("ECT", token, {
+  res.cookie("ARL", token, {
+    httpOnly: false,
+    secure: false,
+    sameSite: "strict",
+    path: "/",
+  });
+
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Error logging out" });
+    }
+    req.session.destroy(() => {
+      res.clearCookie("connect.sid");
+      res.redirect("http://localhost:3000");
+    });
+  });
+});
+
+// @desc    Login with facebook and return token
+// @route   GET /api/v1/auth/facebook/callback
+// @access  Public
+exports.facebookCallback = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const token = createToken({ userId: user.id, role: user.role });
+
+  res.cookie("ARL", token, {
     httpOnly: false,
     secure: false,
     sameSite: "strict",
@@ -97,10 +162,17 @@ exports.protect = asyncHandler(async (req, res, next) => {
       )
     );
   }
+
   // 2) Verify token(no change happens, expired token)
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
   // 3) Check if user exists
-  const currentUser = await User.findById(decoded.userId);
+  let currentUser = null;
+  if (decoded?.role === "user" || decoded?.role === "admin") {
+    currentUser = await User.findById(decoded.userId);
+  } else if (decoded?.role === "employee") {
+    currentUser = await Employee.findById(decoded.userId);
+  }
+
   if (!currentUser) {
     return next(
       new ApiError(
@@ -155,7 +227,11 @@ exports.allowedTo = (...roles) =>
 // @access  Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   // 1) Get user by email
-  const user = await User.findOne({ email: req.body.email });
+  let user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    user = await Employee.findOne({ email: req.body.email });
+  }
+
   if (!user) {
     return next(
       new ApiError(`There is no user with that email ${req.body.email}`, 404)
@@ -224,10 +300,18 @@ exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
     .digest("hex");
 
   // 2) Get user based on reset code
-  const user = await User.findOne({
+  let user = await User.findOne({
     passwordResetCode: hashedResetCode,
     passwordResetExpires: { $gt: Date.now() },
   });
+
+  if (!user) {
+    user = await Employee.findOne({
+      passwordResetCode: hashedResetCode,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+  }
+
   if (!user) {
     return next(new ApiError("Reset code invalid or expired"));
   }
@@ -251,7 +335,11 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     .update(req.body.resetCode)
     .digest("hex");
   // 1) Get user based on email
-  const user = await User.findOne({ email: req.body.email });
+  let user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    user = await Employee.findOne({ email: req.body.email });
+  }
   if (!user) {
     return next(
       new ApiError(`There is no user with email ${req.body.email}`, 404)
@@ -281,6 +369,6 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   await user.save();
 
   // 5) if everything is ok, generate token
-  const token = createToken(user._id);
+  const token = createToken({ userId: user._id, role: user.role });
   res.status(200).json({ token });
 });

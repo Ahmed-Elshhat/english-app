@@ -8,6 +8,8 @@ const {
   deleteUserValidator,
   changeUserPasswordValidator,
   getUsersValidator,
+  sendChangeEmailVerifyCodeValidator,
+  verifyChangeEmailCodeValidator,
 } = require("../utils/validators/userValidator");
 
 const {
@@ -18,45 +20,39 @@ const {
   deleteUser,
   changeUserPassword,
   getOneWithToken,
-  createFilterObj,
-  createUserValidatorMiddleware
+  sendChangeEmailVerifyCode,
+  verifyChangeEmailCode,
 } = require("../controllers/userController");
 
 const AuthService = require("../controllers/authController");
 
-router.put(
-  "/changePassword/:id",
-  changeUserPasswordValidator,
-  changeUserPassword
-);
-
 router.use(AuthService.protect);
 
-router.get("/getOne", getOneWithToken);
+router.put(
+  "/sendChangeEmailVerifyCode",
+  sendChangeEmailVerifyCodeValidator,
+  sendChangeEmailVerifyCode
+);// Done
+
+router.put(
+  "/verifyChangeEmailCode",
+  verifyChangeEmailCodeValidator,
+  verifyChangeEmailCode
+); // Done
+
+router.put("/changePassword", changeUserPasswordValidator, changeUserPassword); // Done
+
+router.get("/getOne", getOneWithToken); // Done
 
 router
   .route("")
-  .get(
-    AuthService.allowedTo("admin"),
-    createFilterObj,
-    getUsersValidator,
-    getUsers
-  )
-  .post(
-    AuthService.allowedTo("admin"),
-    createUserValidator,
-    createUserValidatorMiddleware,
-    createUser
-  );
+  .get(AuthService.allowedTo("admin"), getUsersValidator, getUsers) // Done
+  .post(AuthService.allowedTo("admin"), createUserValidator, createUser); // Done
 
 router
   .route("/:id")
-  .get(AuthService.allowedTo("admin"), getUserValidator, getUser)
-  .put(
-    AuthService.allowedTo("user", "admin"),
-    updateUserValidator,
-    updateUser
-  )
-  .delete(AuthService.allowedTo("admin"), deleteUserValidator, deleteUser);
+  .get(AuthService.allowedTo("admin"), getUserValidator, getUser) // Done
+  .put(updateUserValidator, updateUser) // Done
+  .delete(AuthService.allowedTo("admin"), deleteUserValidator, deleteUser); // Done
 
 module.exports = router;

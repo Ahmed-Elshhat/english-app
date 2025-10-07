@@ -11,6 +11,7 @@ const {
   getVideo,
   getRandomVideos,
   updateVideo,
+  deleteVideo,
 } = require("../controllers/videoController");
 const {
   createVideoValidator,
@@ -18,6 +19,7 @@ const {
   getRandomVideosValidator,
   getVideosValidator,
   updateVideoValidator,
+  deleteVideoValidator,
 } = require("../utils/validators/videoValidator");
 
 router.post("/random", parseJSON, getRandomVideosValidator, getRandomVideos);
@@ -37,12 +39,12 @@ router
   .route("/:id")
   .get(getVideoValidator, getVideo)
   .put(
-    "/:id",
     uploadVideoFiles,
     parseJSON,
     updateVideoValidator,
     resizeVideoFiles,
     updateVideo
-  );
+  )
+  .delete(deleteVideoValidator, deleteVideo);
 
 module.exports = router;

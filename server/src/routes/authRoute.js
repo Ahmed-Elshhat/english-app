@@ -17,6 +17,7 @@ const {
   forgotPassword,
   verifyPassResetCode,
   resetPassword,
+  facebookCallback,
 } = require("../controllers/authController");
 
 router.route("/signup").post(signupValidator, signup);
@@ -46,10 +47,18 @@ router.get(
   googleCallback
 );
 
-// router
-//   .route("/:id")
-//   .get(getUserValidator, getUser)
-//   .put(uploadUserImage, resizeImage, updateUserValidator, updateUser)
-//   .delete(deleteUserValidator, deleteUser);
+// =============== Facebook Login ===============
+router.get(
+  "/facebook",
+  passport.authenticate("facebook", { scope: ["email", "public_profile"] })
+);
+
+router.get(
+  "/facebook/callback",
+  passport.authenticate("facebook", {
+    failureRedirect: "/login-failed",
+  }),
+  facebookCallback
+);
 
 module.exports = router;

@@ -5,6 +5,11 @@ const ApiFeatures = require("../utils/apiFeatures");
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
+    if (req?.user?.id) {
+      if (String(req?.user?.id) === id && req?.user?.role === "admin") {
+        return next(new ApiError("not allowed delete your account", 403));
+      }
+    }
     const document = await Model.findByIdAndDelete(id);
     if (!document) {
       return next(new ApiError(`No document for this id ${id}`, 404));
@@ -18,7 +23,7 @@ exports.updateOne = (Model, populationOpt) =>
       req.params.id,
       req.body,
       { new: true } // If true , returns the updated document And if false returns the original document
-    );
+    ).select("-password -accessToken");
 
     if (populationOpt) {
       query = query.populate({ path: populationOpt, select: "-__v" });
@@ -38,9 +43,23 @@ exports.createOne = (Model, modelName) =>
     const body = {
       ...req.body,
     };
+    if (modelName === "Users") {
+      if (body.role === "admin") {
+        body.points = undefined;
+      } else {
+        body.points = body.points ?? 5;
+      }
+    }
 
     const newDoc = await Model.create(body);
-    res.status(201).json({ data: newDoc });
+
+    const documentObject = newDoc.toObject();
+
+    delete documentObject.accessToken;
+    delete documentObject.password;
+    delete documentObject.__v;
+
+    res.status(201).json({ data: documentObject });
   });
 
 exports.getOne = (Model, populationOpt) =>
@@ -70,6 +89,8 @@ exports.getOne = (Model, populationOpt) =>
     }
 
     const documentObject = document.toObject();
+
+    delete documentObject.accessToken;
     delete documentObject.password;
     delete documentObject.__v;
 
@@ -84,7 +105,7 @@ exports.getAll = (Model, searchKeyWord, populationOpt) =>
     let apiFeatures = new ApiFeatures(Model.find(filterObj), req.query)
       .filter()
       .search(searchKeyWord)
-      .limitFields()
+      .limitFields("-password -accessToken")
       .sort();
 
     const filteredCount = await apiFeatures.mongooseQuery

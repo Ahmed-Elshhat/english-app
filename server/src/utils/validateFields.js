@@ -6,7 +6,7 @@ exports.validateExactFields = (
   allowedQueryFields = []
 ) => [
   body().custom((_, { req }) => {
-    const receivedFields = Object.keys(req.body);
+    const receivedFields = Object.keys(req?.body || {});
     const unexpectedFields = receivedFields.filter(
       (field) => !allowedBodyFields.includes(field)
     );

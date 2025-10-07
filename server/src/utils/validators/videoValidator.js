@@ -360,8 +360,10 @@ exports.updateVideoValidator = [
       "quizzesImages",
       "subtitleEn",
       "subtitleAr",
+      "deleteFlashCards",
+      "deleteQuizzes",
     ],
-    [],
+    ["id"],
     []
   ),
 
@@ -575,5 +577,33 @@ exports.updateVideoValidator = [
     .isString()
     .isLength({ min: 1, max: 1 })
     .withMessage("Answer character must be exactly 1 character"),
+  body("deleteFlashCards")
+    .optional()
+    .isArray({ min: 1 })
+    .withMessage("deleteFlashCards must be a non-empty array")
+    .bail()
+    .custom((arr) => arr.every((id) => mongoose.Types.ObjectId.isValid(id)))
+    .withMessage(
+      "deleteFlashCards must be an array of valid MongoDB ObjectIds"
+    ),
+
+  body("deleteQuizzes")
+    .optional()
+    .isArray({ min: 1 })
+    .withMessage("deleteQuizzes must be a non-empty array")
+    .bail()
+    .custom((arr) => arr.every((id) => mongoose.Types.ObjectId.isValid(id)))
+    .withMessage("deleteQuizzes must be an array of valid MongoDB ObjectIds"),
+
+  validatorMiddleware,
+];
+
+exports.deleteVideoValidator = [
+  validateExactFields([], ["id"], []),
+  check("id")
+    .notEmpty()
+    .withMessage("The video id is required")
+    .isMongoId()
+    .withMessage("Invalid video ID format"),
   validatorMiddleware,
 ];

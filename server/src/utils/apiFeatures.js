@@ -29,12 +29,14 @@ class ApiFeatures {
     return this;
   }
 
-  limitFields() {
+  limitFields(excludeFields = "") {
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(",").join(" ");
-      this.mongooseQuery = this.mongooseQuery.select(`${fields}`);
+      this.mongooseQuery = this.mongooseQuery.select(
+        `${fields} ${excludeFields}`
+      );
     } else {
-      this.mongooseQuery = this.mongooseQuery.select(`-__v`);
+      this.mongooseQuery = this.mongooseQuery.select(`-__v ${excludeFields}`);
     }
     return this;
   }
@@ -52,6 +54,8 @@ class ApiFeatures {
         "FlashCards",
         "Quizzes",
       ];
+
+      const searchFieldWithNameAndEmail = ["Users", "Employees"];
       if (searchFieldWithTitleAndDes.includes(modelName)) {
         query.$or = [
           { title: { $regex: safeKeyword, $options: "i" } },
@@ -59,9 +63,14 @@ class ApiFeatures {
         ];
       } else if (modelName === "Episodes") {
         query = { title: { $regex: safeKeyword, $options: "i" } };
-      } /*  else {
+      } else if (searchFieldWithNameAndEmail.includes(modelName)) {
+        query.$or = [
+          { name: { $regex: safeKeyword, $options: "i" } },
+          { email: { $regex: safeKeyword, $options: "i" } },
+        ];
+      } else {
         query = { name: { $regex: safeKeyword, $options: "i" } };
-      } */
+      }
       this.mongooseQuery = this.mongooseQuery.find(query);
     }
     return this;

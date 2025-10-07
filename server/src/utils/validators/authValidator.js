@@ -3,6 +3,7 @@ const slugify = require("slugify");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const User = require("../../models/userModel");
 const { validateExactFields } = require("../validateFields");
+const Employee = require("../../models/employeeModel");
 
 exports.signupValidator = [
   validateExactFields(["name", "email", "password", "confirmPassword"]),
@@ -20,13 +21,20 @@ exports.signupValidator = [
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Invalid email address")
-    .custom((val) =>
-      User.findOne({ email: val }).then((user) => {
-        if (user) {
-          return Promise.reject(new Error("Email already exists"));
-        }
-      })
-    ),
+    .custom(async (val) => {
+      // دور الأول في User
+      let user = await User.findOne({ email: val });
+      if (!user) {
+        // لو مش لاقي في User دور في Employee
+        user = await Employee.findOne({ email: val });
+      }
+
+      if (user) {
+        throw new Error("Email already exists");
+      }
+
+      return true;
+    }),
   body("password")
     .notEmpty()
     .withMessage("password is required")

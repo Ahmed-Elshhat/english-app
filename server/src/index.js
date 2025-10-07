@@ -42,6 +42,8 @@ folders.forEach((folder) => {
 
 // Routes
 const mountRoutes = require("./routes");
+const User = require("./models/userModel");
+const PlanModel = require("./models/planModel");
 // Connect With DB
 dbConnection();
 
@@ -60,7 +62,9 @@ const port = 8000 || process.env.PORT;
 // );
 
 app.use(cors());
-app.options("*", cors());
+app.options(/(.*)/, cors());
+
+app.set("trust proxy", true);
 
 // compress all responses
 app.use(compression());
@@ -133,15 +137,85 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 // Mount Routes
 mountRoutes(app);
 
-app.all("*", (req, res, next) => {
-  // Create error and send it to error handling middleware
-  // const err = new Error(`Can't find this route: ${req.originalUrl}`);
-  // next(err.message);
+async function addAdmin() {
+  let admin = await User.findOne({ email: "a7medelshhat@gmail.com" });
+  if (!admin) {
+    await User.create({
+      name: "Ahmed",
+      email: "a7medelshhat@gmail.com",
+      password: "pass123",
+      role: "admin",
+      points: 0,
+    });
+  }
+}
+
+addAdmin();
+
+app.all(/(.*)/, (req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });
 
 // Global error handling middleware for express
 app.use(globalError);
+
+async function insertPlans() {
+  await PlanModel.insertMany([
+    {
+      title: "Buy Points",
+      type: "points",
+      price: 10,
+      features: [
+        "Access to core features",
+        "Email support only",
+        "Standard performance speed",
+        "Single device access",
+        "Basic updates included",
+        "5GB storage space",
+        "Limited transactions per month",
+        "Basic templates and layouts",
+        "Essential analytics reports",
+        "Affordable starter plan",
+      ],
+    },
+
+    {
+      title: "Premium Plus",
+      type: "premium_plus",
+      price: 25,
+      features: [
+        "All Basic features included",
+        "Email & live chat support",
+        "Access on up to 3 devices",
+        "50GB storage space",
+        "Double monthly transactions",
+        "More customization options",
+        "Third-party integrations",
+        "Advanced analytics reports",
+        "Early access to updates",
+        "Exclusive discounts & rewards",
+      ],
+    },
+
+    {
+      title: "Premium",
+      type: "premium",
+      price: 15,
+      features: [
+        "All Premium features included",
+        "24/7 VIP customer support",
+        "Unlimited device access",
+        "1TB cloud storage",
+        "Unlimited monthly transactions",
+        "Access to all premium templates",
+        "AI-powered detailed analytics",
+        "Extra security features (2FA & backup)",
+        "Priority access to new features",
+        "Exclusive perks & gifts",
+      ],
+    },
+  ]);
+}
 
 const server = app.listen(port, () => {
   console.log(`App running in port ${port} http://localhost:${port}/`);
