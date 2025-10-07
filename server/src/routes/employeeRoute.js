@@ -2,7 +2,10 @@ const express = require("express");
 
 const router = express.Router();
 
+// Import authentication service (handles login protection and role-based access)
 const AuthService = require("../controllers/authController");
+
+// Import validation middlewares for employee routes
 const {
   getEmployeesValidator,
   createEmployeeValidator,
@@ -10,6 +13,8 @@ const {
   updateEmployeeValidator,
   deleteEmployeeValidator,
 } = require("../utils/validators/employeeValidator");
+
+// Import employee controller functions (business logic for each route)
 const {
   getEmployees,
   createEmployee,
@@ -19,26 +24,26 @@ const {
   createUserValidatorMiddleware,
 } = require("../controllers/employeeController");
 
-router.use(AuthService.protect);
+// Protect all employee routes and allow access only to users with "admin" role
+router.use(AuthService.protect, AuthService.allowedTo("admin"));
 
+// Routes for listing and creating employees
 router
   .route("")
-  .get(AuthService.allowedTo("admin"), getEmployeesValidator, getEmployees)
-  .post(
-    AuthService.allowedTo("admin"),
-    createEmployeeValidator,
-    createUserValidatorMiddleware,
-    createEmployee
-  );
+  // GET /employees → Get all employees (with validation)
+  .get(getEmployeesValidator, getEmployees)
+  // POST /employees → Create a new employee (validate input + user creation)
+  .post(createEmployeeValidator, createUserValidatorMiddleware, createEmployee);
 
+// Routes for a single employee by ID
 router
   .route("/:id")
-  .get(AuthService.allowedTo("admin"), getEmployeeValidator, getEmployee)
+  // GET /employees/:id → Get a specific employee by ID (with validation)
+  .get(getEmployeeValidator, getEmployee)
+  // PUT /employees/:id → Update an employee (validate + user data check)
   .put(updateEmployeeValidator, createUserValidatorMiddleware, updateEmployee)
-  .delete(
-    AuthService.allowedTo("admin"),
-    deleteEmployeeValidator,
-    deleteEmployee
-  );
+  // DELETE /employees/:id → Delete an employee (with validation)
+  .delete(deleteEmployeeValidator, deleteEmployee);
 
+// Export the router to be used in the main app
 module.exports = router;
