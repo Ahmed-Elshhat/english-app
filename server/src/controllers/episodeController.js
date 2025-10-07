@@ -5,6 +5,9 @@ const factory = require("./handlersFactory");
 const Playlist = require("../models/playlistModel");
 const Episode = require("../models/episodeModel");
 
+// @desc    Create episode
+// @route    POST /api/v1/episodes
+// @access    Private
 exports.createEpisode = asyncHandler(async (req, res, next) => {
   const playlistId = req.body.playlistId;
   const seasonNumber = +req.body.seasonNumber;
@@ -40,11 +43,11 @@ exports.createEpisode = asyncHandler(async (req, res, next) => {
       session.endSession();
       return next(
         new ApiError("", 404, [
-        {
-          path: "seasonNumber",
-          msg: `Season ${seasonNumber} not found in this playlist`,
-        },
-      ])
+          {
+            path: "seasonNumber",
+            msg: `Season ${seasonNumber} not found in this playlist`,
+          },
+        ])
       );
     }
 
@@ -95,10 +98,19 @@ exports.createEpisode = asyncHandler(async (req, res, next) => {
   }
 });
 
+// @desc    Get list of episodes
+// @route    GET /api/v1/episodes
+// @access    Private
 exports.getEpisodes = factory.getAll(Episode, "Episodes");
 
+// @desc    Get specific episode by id
+// @route    GET /api/v1/episodes/:id
+// @access    Private
 exports.getEpisode = factory.getOne(Episode);
 
+// @desc    Update specific episode
+// @route    PUT /api/v1/episodes/:id
+// @access    Private
 exports.updateEpisode = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { title, episodeNumber, playlistId, seasonNumber } = req.body;
@@ -211,6 +223,9 @@ exports.updateEpisode = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Delete specific episode
+// @route    PUT /api/v1/episodes/:id
+// @access    Private
 exports.deleteEpisode = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 

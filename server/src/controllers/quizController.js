@@ -32,24 +32,19 @@ exports.resizeImage = asyncHandler(async (req, res, next) => {
   next();
 });
 
+// @desc    Get list of quizzes
+// @route    GET /api/v1/quizzes
+// @access    Private
 exports.getQuizzes = factory.getAll(Quiz, "Quizzes");
+
+// @desc    Get specific quiz by id
+// @route    GET /api/v1/quizzes/:id
+// @access    Protect
 exports.getQuiz = factory.getOne(Quiz);
 
-/**
- * Get random Quizzes excluding certain IDs.
- * - Quizzes Size defines how many to fetch (default 20)
- * - excludeIds ensures no duplicates from client cache
- *
- * Steps:
- * 1. Convert excludeIds to ObjectId for MongoDB filtering.
- * 2. Count how many Quizzes are left after excluding the given IDs.
- * 3. Calculate the remaining count after fetching this batch.
- * 4. Fetch a random batch of Quizzes using $sample.
- * 5. Format quiz documents (add absolute image URL if exists).
- * 6. Calculate how many pages remain based on remaining count.
- * 7. Return response with results, total, remainingPages, and Quizzes.
- */
-
+// @desc    Get list of random quizzes
+// @route    POST /api/v1/quizzes/random
+// @access    protect
 exports.getRandomQuizzes = asyncHandler(async (req, res) => {
   const { quizzesSize } = req.query;
   const { excludeIds = [] } = req.body;
@@ -93,6 +88,9 @@ exports.getRandomQuizzes = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Update specific quiz
+// @route    PUT /api/v1/quizzes/:id
+// @access    Private
 exports.updateQuiz = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const newImage = req.body.image;
@@ -209,11 +207,9 @@ exports.updateQuiz = asyncHandler(async (req, res, next) => {
   }
 });
 
-/**
- * Delete a quiz by ID
- * - Uses transaction for safe deletion
- * - Also deletes associated image file if it exists
- */
+// @desc    Delete specific quiz
+// @route    PUT /api/v1/quizzes/:id
+// @access    Private
 exports.deleteQuiz = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 

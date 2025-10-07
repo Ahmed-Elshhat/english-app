@@ -32,24 +32,19 @@ exports.resizeImage = asyncHandler(async (req, res, next) => {
   next();
 });
 
+// @desc    Get list of flash cards
+// @route    GET /api/v1/flashCards
+// @access    Private
 exports.getFlashCards = factory.getAll(FlashCard, "FlashCards");
+
+// @desc    Get specific flash card by id
+// @route    GET /api/v1/flashCards/:id
+// @access    Protect
 exports.getFlashCard = factory.getOne(FlashCard);
 
-/**
- * Get random flash cards excluding certain IDs.
- * - flash cards Size defines how many to fetch (default 20)
- * - excludeIds ensures no duplicates from client cache
- *
- * Steps:
- * 1. Convert excludeIds to ObjectId for MongoDB filtering.
- * 2. Count how many flash cards are left after excluding the given IDs.
- * 3. Calculate the remaining count after fetching this batch.
- * 4. Fetch a random batch of flash cards using $sample.
- * 5. Format flash card documents (add absolute image URL if exists).
- * 6. Calculate how many pages remain based on remaining count.
- * 7. Return response with results, total, remainingPages, and flash cards.
- */
-
+// @desc    Get list of random flash cards
+// @route    POST /api/v1/flashCards/random
+// @access    protect
 exports.getRandomFlashCards = asyncHandler(async (req, res) => {
   const { flashCardsSize } = req.query;
   const { excludeIds = [] } = req.body;
@@ -93,54 +88,9 @@ exports.getRandomFlashCards = asyncHandler(async (req, res) => {
   });
 });
 
-exports.updateFlashCard = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const image = req.body.image;
-
-  let imagePath = null;
-  if (image) {
-    imagePath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "uploads",
-      "flashCards",
-      image
-    );
-    if (!fs.existsSync(imagePath)) {
-      return next(new ApiError("Uploaded image not found", 404));
-    }
-  }
-
-  const flashCard = await FlashCard.findById(id);
-  if (!flashCard) {
-    return next(new ApiError("flash card not found", 404));
-  }
-
-  const oldImagePath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "uploads",
-    "flashCards",
-    flashCard.image
-  );
-
-  const flashCardUpdated = await FlashCard.findByIdAndUpdate(id, req.body, {
-    new: true,
-  });
-
-  try {
-    if (fs.existsSync(oldImagePath)) await fs.promises.unlink(oldImagePath);
-  } catch (error) {
-    console.error(
-      `Failed to delete uploaded file ${oldImagePath}: ${error.message}`
-    );
-  }
-
-  res.status(200).json({ data: flashCardUpdated });
-});
-
+// @desc    Update specific flash card
+// @route    PUT /api/v1/flashCard/:id
+// @access    Private
 exports.updateFlashCard = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const newImage = req.body.image;
@@ -240,11 +190,9 @@ exports.updateFlashCard = asyncHandler(async (req, res, next) => {
   }
 });
 
-/**
- * Delete a flash card by ID
- * - Uses transaction for safe deletion
- * - Also deletes associated image file if it exists
- */
+// @desc    Delete specific flash card
+// @route    PUT /api/v1/flashCard/:id
+// @access    Private
 exports.deleteFlashCard = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 

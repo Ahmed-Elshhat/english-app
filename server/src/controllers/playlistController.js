@@ -84,21 +84,24 @@ exports.parseJSON = asyncHandler(async (req, res, next) => {
 
 // ---------------------- CRUD OPERATIONS ----------------------
 
-// Create a new playlist
+// @desc    Create playlist
+// @route    POST /api/v1/playlists
+// @access    Private
 exports.createPlaylist = factory.createOne(Playlist);
 
-// Get all playlists (with filters, pagination, etc.)
+// @desc    Get list of playlist
+// @route    GET /api/v1/playlist
+// @access    Private
 exports.getPlaylists = factory.getAll(Playlist, "Playlists");
 
-// Get a single playlist by ID
+// @desc    Get specific playlist by id
+// @route    GET /api/v1/playlists/:id
+// @access    Private
 exports.getPlaylist = factory.getOne(Playlist);
 
-/**
- * Get random playlists based on type and excluding certain IDs.
- * - playlistsType (series/movie) is required
- * - playlistsSize defines how many to fetch (default 20)
- * - excludeIds ensures no duplicates from client cache
- */
+// @desc    Get list of random playlists
+// @route    POST /api/v1/playlists/random
+// @access    protect
 exports.getRandomPlaylists = asyncHandler(async (req, res) => {
   const { playlistsType, playlistsSize } = req.query;
   const { excludeIds = [] } = req.body;
@@ -144,11 +147,9 @@ exports.getRandomPlaylists = asyncHandler(async (req, res) => {
   });
 });
 
-/**
- * Update a playlist by ID
- * - Uses transaction to ensure atomicity
- * - If a new image is uploaded, deletes the old one
- */
+// @desc    Update specific playlist
+// @route    PUT /api/v1/playlists/:id
+// @access    Private
 exports.updatePlaylist = asyncHandler(async (req, res, next) => {
   // Step 1: Start session and transaction
   const session = await mongoose.startSession();
@@ -210,11 +211,9 @@ exports.updatePlaylist = asyncHandler(async (req, res, next) => {
   }
 });
 
-/**
- * Delete a playlist by ID
- * - Uses transaction for safe deletion
- * - Also deletes associated image file if it exists
- */
+// @desc    Delete specific playlist
+// @route    PUT /api/v1/playlists/:id
+// @access    Private
 exports.deletePlaylist = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 

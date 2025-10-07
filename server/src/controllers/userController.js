@@ -11,60 +11,12 @@ const createToken = require("../utils/createToken");
 // @desc    Get list of users
 // @route    GET /api/v1/users
 // @access    Private
-exports.getUsers = factory.getAll(User, "Users"); // Done
+exports.getUsers = factory.getAll(User, "Users");
 
 // @desc    Get specific user by id
 // @route    GET /api/v1/users/:id
 // @access    Private
-exports.getUser = factory.getOne(User); // done
-
-// transform time format to number
-// function getHour(time) {
-//   const match = time.match(/^0?(\d+):([0-5]\d)$/);
-//   if (!match) return { hour: null, minutes: null };
-
-//   const hour = parseInt(match[1], 10);
-//   let minutes = parseInt(match[2], 10);
-
-//   if (minutes === 0) minutes = 0;
-
-//   return { hour, minutes };
-// }
-
-// Middleware because transform time format to number for StartShift and EndShift
-// exports.createUserValidatorMiddleware = (req, res, next) => {
-//   let errors = {};
-//   let startShift = getHour(req.body.startShift);
-//   let endShift = getHour(req.body.endShift);
-
-//   console.log(startShift.hour, startShift.hour);
-//   console.log(endShift.hour, endShift.hour);
-
-//   if (!startShift?.hour || startShift?.hour > 24) {
-//     errors.startShift =
-//       "Invalid start shift time must be between 1 and 24 example(01:00 Or 24:00)";
-//   }
-
-//   if (!endShift?.hour || endShift?.hour > 24) {
-//     errors.endShift =
-//       "Invalid end shift time must be between 1 and 24 example(01:00 Or 24:00)";
-//   }
-
-//   if (
-//     startShift.hour === endShift.hour &&
-//     startShift.minutes === endShift.minutes
-//   ) {
-//     errors.shiftMatch = "Start shift and end shift cannot be the same.";
-//   }
-
-//   if (Object.keys(errors).length > 0) {
-//     return next(new ApiError("Shift Errors", 400, errors));
-//   }
-
-//   req.body.startShift = startShift;
-//   req.body.endShift = endShift;
-//   next();
-// };
+exports.getUser = factory.getOne(User);
 
 // @desc    Create user
 // @route    POST /api/v1/users
@@ -73,7 +25,7 @@ exports.createUser = factory.createOne(User, "Users");
 
 // @desc    Update specific user
 // @route    PUT /api/v1/users/:id
-// @access    Private
+// @access    protected
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { name } = req.body;
@@ -117,6 +69,9 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   res.status(200).json({ data: documentObject });
 });
 
+// @desc    Change password specific user
+// @route    PUT /api/v1/users/changePassword
+// @access    protected
 exports.changeUserPassword = asyncHandler(async (req, res, next) => {
   if (!req.body.password) {
     return next(new ApiError("Password is required to update", 400));
@@ -151,6 +106,9 @@ exports.changeUserPassword = asyncHandler(async (req, res, next) => {
   res.status(200).json({ data: user, token });
 });
 
+// @desc    Send change email verify code
+// @route    PUT /api/v1/users/sendChangeEmailVerifyCode
+// @access    protected
 exports.sendChangeEmailVerifyCode = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
   let currentUser = req.user;
@@ -221,6 +179,9 @@ exports.sendChangeEmailVerifyCode = asyncHandler(async (req, res, next) => {
     .json({ status: "Success", message: "Verification code sent to email" });
 });
 
+// @desc    Verify change email code
+// @route    PUT /api/v1/users/verifyChangeEmailCode
+// @access    protected
 exports.verifyChangeEmailCode = asyncHandler(async (req, res, next) => {
   const { resetCode } = req.body;
   const currentUser = req.user;
@@ -264,8 +225,12 @@ exports.verifyChangeEmailCode = asyncHandler(async (req, res, next) => {
 // @desc    Delete specific user
 // @route    PUT /api/v1/users/:id
 // @access    Private
-exports.deleteUser = factory.deleteOne(User); //Done
+exports.deleteUser = factory.deleteOne(User);
 
+
+// @desc    Get user with token
+// @route    Get /api/v1/users/getOne
+// @access    protect
 exports.getOneWithToken = asyncHandler(async (req, res) => {
   res.status(200).json({ user: req.user });
-}); // Done
+});
