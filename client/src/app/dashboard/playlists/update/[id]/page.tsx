@@ -5,10 +5,10 @@ import { IoClose } from "react-icons/io5";
 import { AxiosError } from "axios";
 import "./updatePlaylist.scss";
 import Loading from "@/components/Loading/Loading";
-import { Axios } from "@/Api/axios";
 import { PLAYLISTS } from "@/Api/Api";
 import { PlaylistSchema } from "@/Types/app";
 import { RiPlayList2Fill } from "react-icons/ri";
+import { AxiosClient } from "@/Api/axiosClient";
 
 function UpdatePlaylistPage() {
   const { id } = useParams();
@@ -36,11 +36,12 @@ function UpdatePlaylistPage() {
   const [flag, setFlag] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const axios = AxiosClient();
 
   useEffect(() => {
     const fetchPlaylist = async () => {
       try {
-        const res = await Axios.get(`${PLAYLISTS}/${id}`);
+        const res = await axios.get(`${PLAYLISTS}/${id}`);
         const data = res.data.data;
         setPlaylist(data);
         setPreviewImage(data.imageUrl);
@@ -290,7 +291,7 @@ function UpdatePlaylistPage() {
     }
 
     try {
-      const res = await Axios.put(`${PLAYLISTS}/${id}`, formData, {
+      const res = await axios.put(`${PLAYLISTS}/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

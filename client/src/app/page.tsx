@@ -53,10 +53,10 @@ function Home() {
 
           <div className="right_side">
             <nav>
-              <Link href="/login">
+              <Link href="/auth/login">
                 <button className="signin_btn">Sign in</button>
               </Link>
-              <Link href="/signup">
+              <Link href="/auth/signup">
                 <button className="signup_btn">Sign up</button>
               </Link>
             </nav>
@@ -69,7 +69,7 @@ function Home() {
             scene comes with side-by-side English and Arabic subtitles, helping
             you learn new words naturally while enjoying the story.
           </p>
-          <Link href="/login">
+          <Link href="/auth/login">
             <button>Let&apos;s learn</button>
           </Link>
         </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Axios } from "@/Api/axios";
+import { AxiosServer } from "@/Api/axiosServer";
 import { PLAYLISTS } from "@/Api/Api";
 import { PlaylistSchema } from "@/Types/app";
 import PlaylistCards from "@/components/PlaylistsCards/PlaylistsCards";
@@ -12,9 +12,11 @@ async function SeriesPlaylistsPage() {
   // Number of remaining pages for infinite scroll
   let remainingPages: number = 0;
 
+  
   try {
+    const axios = await AxiosServer();
     // Fetch random playlists from the server (3 playlists per request)
-    const res = await Axios.post(
+    const res = await axios.post(
       `${PLAYLISTS}/random?playlistsType=series&playlistsSize=3`
     );
 

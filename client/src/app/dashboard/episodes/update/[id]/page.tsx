@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import "./updateEpisode.scss";
 import Loading from "@/components/Loading/Loading";
-import { Axios } from "@/Api/axios";
 import { EPISODES } from "@/Api/Api";
 import { EpisodeSchema } from "@/Types/app";
 import { MdLiveTv } from "react-icons/md";
+import { AxiosClient } from "@/Api/axiosClient";
 
 function UpdateEpisodePage() {
   const { id } = useParams();
@@ -26,11 +26,12 @@ function UpdateEpisodePage() {
   const [flag, setFlag] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const axios = AxiosClient();
 
   useEffect(() => {
     const fetchEpisode = async () => {
       try {
-        const res = await Axios.get(`${EPISODES}/${id}`);
+        const res = await axios.get(`${EPISODES}/${id}`);
         const data = res.data.data;
         setEpisode(data);
 
@@ -178,7 +179,7 @@ function UpdateEpisodePage() {
     };
 
     try {
-      const res = await Axios.put(`${EPISODES}/${id}`, data, {
+      const res = await axios.put(`${EPISODES}/${id}`, data, {
         headers: { "Content-Type": "application/json" },
       });
 

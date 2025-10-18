@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Axios } from "@/Api/axios";
 import { PLAYLISTS } from "@/Api/Api";
 import { PlaylistSchema } from "@/Types/app";
 import PlaylistCards from "@/components/PlaylistsCards/PlaylistsCards";
 import "./movies.scss";
+import { AxiosServer } from "@/Api/axiosServer";
 
 // Page component for displaying "Movies" playlists
 async function MoviesPlaylistsPage() {
@@ -13,8 +13,9 @@ async function MoviesPlaylistsPage() {
   let remainingPages: number = 0;
 
   try {
+        const axios = await AxiosServer();
     // Fetch random movie playlists from the server (3 playlists per request)
-    const res = await Axios.post(
+    const res = await axios.post(
       `${PLAYLISTS}/random?playlistsType=movie&playlistsSize=3`
     );
 

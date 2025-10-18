@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
   {
     accessToken: String,
     facebookAccessToken: String,
-    googleId:String,
+    googleId: String,
     facebookId: String,
     name: {
       type: String,
@@ -22,6 +22,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "password is required"],
       minlength: [6, "Too short password"],
+    },
+    currentPlan: {
+      type: String,
+      enum: ["free", "premium", "premium_plus"],
+      default: "free",
+    },
+    planPurchasedAt: {
+      type: Date,
+    },
+    planExpiresAt: {
+      type: Date,
     },
     points: Number,
     passwordChangedAt: Date,

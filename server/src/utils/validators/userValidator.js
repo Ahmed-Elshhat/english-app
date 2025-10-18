@@ -6,7 +6,11 @@ const { validateExactFields } = require("../validateFields");
 const Employee = require("../../models/employeeModel");
 
 exports.getUsersValidator = [
-  validateExactFields([], [], ["page", "limit", "keyword", "name", "email", "sort", "_id"]),
+  validateExactFields(
+    [],
+    [],
+    ["page", "limit", "keyword", "name", "email", "sort", "_id"]
+  ),
   validatorMiddleware,
 ];
 
@@ -79,7 +83,10 @@ exports.createUserValidator = [
 ];
 
 exports.updateUserValidator = [
-  validateExactFields(["name", "points"], ["id"]),
+  validateExactFields(
+    ["name", "points", "currentPlan", "planPurchasedAt", "planExpiresAt"],
+    ["id"]
+  ),
   check("id").isMongoId().withMessage("Invalid user id format"),
   body("name")
     .optional()
@@ -88,7 +95,39 @@ exports.updateUserValidator = [
   body("points")
     .optional()
     .isInt({ min: 0 })
-    .withMessage("points must be an integer greater than or equal to 0"),
+    .withMessage("Points must be an integer greater than or equal to 0"),
+  body("currentPlan")
+    .optional()
+    .isIn(["free", "premium", "premium_plus"])
+    .withMessage("Current plan must be one of: free, premium, premium_plus")
+    .custom((value, { req }) => {
+      if (value !== "free") {
+        if (!req.body.planPurchasedAt && !req.body.planExpiresAt) {
+          throw new Error(
+            "Both plan start and end dates are required for premium plans."
+          );
+        }
+      }
+      return true;
+    }),
+  body("planPurchasedAt")
+    .optional()
+    .isISO8601()
+    .withMessage("Plan start date must be a valid date."),
+  body("planExpiresAt")
+    .optional()
+    .isISO8601()
+    .withMessage("Plan end date must be a valid date.")
+    .custom((value, { req }) => {
+      if (req.body.planPurchasedAt && value) {
+        const startDate = new Date(req.body.planPurchasedAt);
+        const endDate = new Date(value);
+        if (endDate <= startDate) {
+          throw new Error("Plan end date must be after the plan start date.");
+        }
+      }
+      return true;
+    }),
   validatorMiddleware,
 ];
 

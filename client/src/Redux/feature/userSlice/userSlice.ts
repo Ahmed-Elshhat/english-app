@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { Axios } from "../../../Api/axios";
 import { initialStateGetUser } from "../../../Types/app";
 import { GET_ME } from "../../../Api/Api";
+import { AxiosClient } from "@/Api/axiosClient";
 
 const initialState: initialStateGetUser = {
   loading: false,
@@ -11,7 +11,8 @@ const initialState: initialStateGetUser = {
 
 const fetchUsers = createAsyncThunk("user/fetchUsers", async () => {
   try {
-    const res = await Axios.get(`${GET_ME}`);
+    const axios = AxiosClient();
+    const res = await axios.get(`${GET_ME}`);
     if (res.status === 200) {
       return res.data.user;
     }

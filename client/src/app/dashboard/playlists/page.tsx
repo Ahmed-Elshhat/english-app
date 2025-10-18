@@ -1,6 +1,5 @@
 "use client";
 import { PLAYLISTS } from "@/Api/Api";
-import { Axios } from "@/Api/axios";
 import CopyButton from "@/components/CopyButton/CopyButton";
 import Loading from "@/components/Loading/Loading";
 import { PlaylistSchema } from "@/Types/app";
@@ -9,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FaEye, FaTrash } from "react-icons/fa";
 import { MdEditSquare } from "react-icons/md";
 import "./playlists.scss";
+import { AxiosClient } from "@/Api/axiosClient";
 
 function ShowPlaylistsPage() {
   const [playlists, setPlaylists] = useState<PlaylistSchema[]>([]);
@@ -26,6 +26,7 @@ function ShowPlaylistsPage() {
   const [sortOrder, setSortOrder] = useState("newest");
   const [playlistType, setPlaylistType] = useState("");
   const stopLoading = useRef(0);
+  const axios = AxiosClient();
 
   useEffect(() => {
     const getPlaylists = async () => {
@@ -48,7 +49,7 @@ function ShowPlaylistsPage() {
           : "";
 
       try {
-        const res = await Axios.get(
+        const res = await axios.get(
           `${PLAYLISTS}?page=1&limit=30${playlistTypeQuery}${sortOrderQuery}${keyword}${_id}`
         );
         if (res.status === 200) {
@@ -81,7 +82,7 @@ function ShowPlaylistsPage() {
     ) {
       setLoading({ status: true, type: "bottom" });
       try {
-        const res = await Axios.get(
+        const res = await axios.get(
           `${PLAYLISTS}?page=${paginationResults.next}&limit=30`
         );
         if (res.status === 200) {
@@ -105,7 +106,7 @@ function ShowPlaylistsPage() {
   const handleDelete = async (id: string) => {
     setLoading({ status: true, type: "normal" });
     try {
-      const res = await Axios.delete(`${PLAYLISTS}/${id}`);
+      const res = await axios.delete(`${PLAYLISTS}/${id}`);
       if (res.status === 204) {
         setPlaylists(playlists.filter((playlist) => playlist._id !== id));
         setLoading({ status: false, type: "normal" });

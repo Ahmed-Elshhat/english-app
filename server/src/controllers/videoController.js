@@ -15,6 +15,7 @@ const Playlist = require("../models/playlistModel");
 const Episode = require("../models/episodeModel");
 const FlashCard = require("../models/flashCardModel");
 const Quiz = require("../models/quizModel");
+const addToGarbage = require("../utils/addToGarbage");
 
 function parseSubtitleFile(filePath) {
   const content = fs.readFileSync(filePath, "utf8");
@@ -71,7 +72,7 @@ exports.resizeVideoFiles = asyncHandler(async (req, res, next) => {
       const videoPath = path.join("uploads/videos", videoFileName);
 
       // نكتب الملف من الـ buffer
-      fs.writeFileSync(videoPath, videoFile.buffer);
+      await fs.promises.writeFile(videoPath, videoFile.buffer);
 
       // نخزن الاسم في الـ req.body
       uploadedFiles.push(
@@ -197,7 +198,7 @@ exports.resizeVideoFiles = asyncHandler(async (req, res, next) => {
 
       const subtitleEnPath = path.join("uploads/subtitles", subtitleEnFileName);
 
-      fs.writeFileSync(subtitleEnPath, subtitleEnFile.buffer);
+      await fs.promises.writeFile(subtitleEnPath, subtitleEnFile.buffer);
 
       uploadedFiles.push(
         path.join(__dirname, "..", "uploads", "subtitles", subtitleEnFileName)
@@ -217,7 +218,7 @@ exports.resizeVideoFiles = asyncHandler(async (req, res, next) => {
 
       const subtitleArPath = path.join("uploads/subtitles", subtitleArFileName);
 
-      fs.writeFileSync(subtitleArPath, subtitleArFile.buffer);
+      await fs.promises.writeFile(subtitleArPath, subtitleArFile.buffer);
 
       uploadedFiles.push(
         path.join(__dirname, "..", "uploads", "subtitles", subtitleArFileName)
@@ -346,90 +347,187 @@ function validateAndMapImagesToItems({
   itemsArray, // req.body.flashCards or req.body.quizzes
   itemNumberField, // "flashCardNumber" or "quizNumber"
   imageTypeLabel, // "flash card" أو "quiz"
+  method,
 }) {
   const hasImages = Array.isArray(imagesArray) && imagesArray.length > 0;
   const hasItems = Array.isArray(itemsArray) && itemsArray.length > 0;
 
-  // لو بعت عناصر من غير صور
-  if (hasItems && !hasImages) {
-    return {
-      ok: false,
-      message: `You provided ${imageTypeLabel}s but no ${imageTypeLabel} images in request body.`,
-    };
-  }
-
-  // لو بعت صور من غير عناصر
-  if (hasImages && !hasItems) {
-    return {
-      ok: false,
-      message: `You provided ${imageTypeLabel} images but no corresponding ${imageTypeLabel}s in request body.`,
-    };
-  }
-
-  // لو مفيش لا صور ولا عناصر → عادي
-  if (!hasItems && !hasImages) {
-    return { ok: true };
-  }
-
-  // لو العدد مش متساوي
-  if (imagesArray.length !== itemsArray.length) {
-    return {
-      ok: false,
-      message: `Number of ${imageTypeLabel} images (${imagesArray.length}) must equal number of ${imageTypeLabel}s (${itemsArray.length}).`,
-    };
-  }
-
-  // تحقق من وجود رقم لكل عنصر
-  const itemNumbers = itemsArray.map((it, idx) => {
-    const val = it[itemNumberField];
-    if (val === undefined || val === null || val === "") {
-      throw new Error(
-        `Each ${imageTypeLabel} must include '${itemNumberField}'. Missing at index ${idx}.`
-      );
+  if (method === "create") {
+    // لو بعت عناصر من غير صور
+    if (hasItems && !hasImages) {
+      return {
+        ok: false,
+        message: `You provided ${imageTypeLabel}s but no ${imageTypeLabel} images in request body.`,
+      };
     }
-    return String(val);
-  });
 
-  // منع التكرار في الأرقام
-  if (new Set(itemNumbers).size !== itemNumbers.length) {
-    return {
-      ok: false,
-      message: `Duplicate ${itemNumberField} found in ${imageTypeLabel}s. Each must be unique.`,
-    };
+    // لو بعت صور من غير عناصر
+    if (hasImages && !hasItems) {
+      return {
+        ok: false,
+        message: `You provided ${imageTypeLabel} images but no corresponding ${imageTypeLabel}s in request body.`,
+      };
+    }
+
+    // لو مفيش لا صور ولا عناصر → عادي
+    if (!hasItems && !hasImages) {
+      return { ok: true };
+    }
+
+    // لو العدد مش متساوي
+    if (imagesArray.length !== itemsArray.length) {
+      return {
+        ok: false,
+        message: `Number of ${imageTypeLabel} images (${imagesArray.length}) must equal number of ${imageTypeLabel}s (${itemsArray.length}).`,
+      };
+    }
+
+    // تحقق من وجود رقم لكل عنصر
+    const itemNumbers = itemsArray.map((it, idx) => {
+      const val = it[itemNumberField];
+      if (val === undefined || val === null || val === "") {
+        throw new Error(
+          `Each ${imageTypeLabel} must include '${itemNumberField}'. Missing at index ${idx}.`
+        );
+      }
+      return String(val);
+    });
+
+    // منع التكرار في الأرقام
+    if (new Set(itemNumbers).size !== itemNumbers.length) {
+      return {
+        ok: false,
+        message: `Duplicate ${itemNumberField} found in ${imageTypeLabel}s. Each must be unique.`,
+      };
+    }
+
+    // منع التكرار في أسماء الصور
+    const originalNames = imagesArray.map((img) => String(img.originalName));
+    if (new Set(originalNames).size !== originalNames.length) {
+      return {
+        ok: false,
+        message: `Duplicate originalName found in uploaded ${imageTypeLabel} images. Each must be unique.`,
+      };
+    }
+
+    // تحقق من التطابق بين الأسماء والأرقام
+    const missingMatches = originalNames.filter(
+      (orig) => !itemNumbers.includes(orig)
+    );
+    if (missingMatches.length > 0) {
+      return {
+        ok: false,
+        message: `These originalName(s) don't match any ${itemNumberField}: ${missingMatches.join(
+          ", "
+        )}`,
+      };
+    }
+
+    // mapping الصور مع العناصر
+    imagesArray.forEach((img) => {
+      const orig = String(img.originalName);
+      const item = itemsArray.find(
+        (it) => String(it[itemNumberField]) === orig
+      );
+      if (item) item.image = img.newName;
+    });
+  } else if (method === "update") {
+    // ✅ هنا المنطق الجديد للـ update
+    if (!hasItems && !hasImages) return { ok: true };
+
+    const itemNumbers = itemsArray.map((it, idx) => {
+      const val = it[itemNumberField];
+      if (val === undefined || val === null || val === "")
+        throw new Error(
+          `Each ${imageTypeLabel} must include '${itemNumberField}'. Missing at index ${idx}.`
+        );
+      return String(val);
+    });
+
+    if (new Set(itemNumbers).size !== itemNumbers.length) {
+      return {
+        ok: false,
+        message: `Duplicate ${itemNumberField} found in ${imageTypeLabel}s. Each must be unique.`,
+      };
+    }
+
+    if (hasImages) {
+      const originalNames = imagesArray.map((img) => String(img.originalName));
+      if (new Set(originalNames).size !== originalNames.length) {
+        return {
+          ok: false,
+          message: `Duplicate originalName found in uploaded ${imageTypeLabel} images. Each must be unique.`,
+        };
+      }
+
+      const unmatched = originalNames.filter(
+        (orig) => !itemNumbers.includes(orig)
+      );
+      if (unmatched.length > 0) {
+        return {
+          ok: false,
+          message: `These ${imageTypeLabel} image(s) do not belong to any provided ${imageTypeLabel}: ${unmatched.join(
+            ", "
+          )}`,
+        };
+      }
+
+      // ✅ ربط الصور بالعناصر
+      imagesArray.forEach((img) => {
+        const orig = String(img.originalName);
+        const item = itemsArray.find(
+          (it) => String(it[itemNumberField]) === orig
+        );
+        if (item) {
+          item.image = img.newName;
+          item._newImageUploaded = true; // نعلمها عشان اللي بينادي يعرف دي صورة جديدة
+        }
+      });
+    }
+
+    // ✅ تحقق إن كل عنصر له رقم ومفيش تضارب
+    itemsArray.forEach((it, idx) => {
+      const val = it[itemNumberField];
+      if (val === undefined || val === null || val === "")
+        throw new Error(
+          `Each ${imageTypeLabel} must include '${itemNumberField}'. Missing at index ${idx}.`
+        );
+    });
   }
-
-  // منع التكرار في أسماء الصور
-  const originalNames = imagesArray.map((img) => String(img.originalName));
-  if (new Set(originalNames).size !== originalNames.length) {
-    return {
-      ok: false,
-      message: `Duplicate originalName found in uploaded ${imageTypeLabel} images. Each must be unique.`,
-    };
-  }
-
-  // تحقق من التطابق بين الأسماء والأرقام
-  const missingMatches = originalNames.filter(
-    (orig) => !itemNumbers.includes(orig)
-  );
-  if (missingMatches.length > 0) {
-    return {
-      ok: false,
-      message: `These originalName(s) don't match any ${itemNumberField}: ${missingMatches.join(
-        ", "
-      )}`,
-    };
-  }
-
-  // mapping الصور مع العناصر
-  imagesArray.forEach((img) => {
-    const orig = String(img.originalName);
-    const item = itemsArray.find((it) => String(it[itemNumberField]) === orig);
-    if (item) item.image = img.newName;
-  });
-
   return { ok: true };
 }
 
+// Helper functions
+const pushIfExists = (fileName, folder, uploadedFiles_) => {
+  if (!fileName) return null;
+  const filePath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "uploads",
+    folder,
+    fileName
+  );
+  if (fs.existsSync(filePath)) {
+    uploadedFiles_.push(filePath);
+    return filePath;
+  }
+  return null;
+};
+
+function validateUploadedFile({ fileName, filePath, fileLabel }) {
+  if (!fileName) {
+    throw new ApiError(`No ${fileLabel} file found in body request`, 400);
+  }
+
+  if (!fs.existsSync(filePath)) {
+    throw new ApiError(`Uploaded ${fileLabel} file not found on server`, 400);
+  }
+}
+
+// @desc    Create video
+// @route    POST /api/v1/videos
+// @access    Private
 exports.createVideo = asyncHandler(async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -438,7 +536,7 @@ exports.createVideo = asyncHandler(async (req, res, next) => {
   const uploadedFiles = [];
 
   try {
-    const {
+    let {
       title,
       description,
       videoImage,
@@ -451,94 +549,64 @@ exports.createVideo = asyncHandler(async (req, res, next) => {
     } = req.body;
 
     // جمع كل الصور في uploadedFiles للحذف لو حصل خطأ
-    if (videoImage)
-      uploadedFiles.push(
-        path.join(__dirname, "..", "..", "uploads", "videosImages", videoImage)
-      );
+    const videoFileName = req.body.video;
+    const videoPath = pushIfExists(videoFileName, "videos", uploadedFiles);
+
+    const videoImageFileName = req.body.videoImage;
+    const videoImagePath = pushIfExists(
+      videoImageFileName,
+      "videosImages",
+      uploadedFiles
+    );
+
+    const subtitleEnFileName = req.body.subtitleEn;
+    const subtitleEnPath = pushIfExists(
+      subtitleEnFileName,
+      "subtitles",
+      uploadedFiles
+    );
+    const subtitleArFileName = req.body.subtitleAr;
+    const subtitleArPath = pushIfExists(
+      subtitleArFileName,
+      "subtitles",
+      uploadedFiles
+    );
+
     if (Array.isArray(req.body.flashCardsImages)) {
       req.body.flashCardsImages.forEach((img) =>
-        uploadedFiles.push(
-          path.join(__dirname, "..", "..", "uploads", "flashCards", img.newName)
-        )
+        pushIfExists(img.newName, "flashCards", uploadedFiles)
       );
     }
+
     if (Array.isArray(req.body.quizzesImages)) {
       req.body.quizzesImages.forEach((img) =>
-        uploadedFiles.push(
-          path.join(__dirname, "..", "..", "uploads", "quizzes", img.newName)
-        )
+        pushIfExists(img.newName, "quizzes", uploadedFiles)
       );
     }
 
-    if (!req.body.video) {
-      throw new ApiError("No video file found in body request", 400);
-    }
+    validateUploadedFile({
+      fileName: videoFileName,
+      filePath: videoPath,
+      fileLabel: "video",
+    });
 
-    const videoFileName = req.body.video;
-    const videoPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "uploads",
-      "videos",
-      videoFileName
-    );
+    validateUploadedFile({
+      fileName: videoImageFileName,
+      filePath: videoImagePath,
+      fileLabel: "video image",
+    });
 
-    if (!fs.existsSync(videoPath)) {
-      throw new ApiError("Uploaded video file not found on server", 400);
-    }
+    validateUploadedFile({
+      fileName: subtitleEnFileName,
+      filePath: subtitleEnPath,
+      fileLabel: "video english subtitle",
+    });
 
-    uploadedFiles.push(videoPath);
-
-    if (!req.body.subtitleEn) {
-      throw new ApiError(
-        "No video english subtitle file found in body request",
-        400
-      );
-    }
-    const subtitleEnFileName = req.body.subtitleEn;
-    const subtitleEnPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "uploads",
-      "subtitles",
-      subtitleEnFileName
-    );
-
-    if (!fs.existsSync(subtitleEnPath)) {
-      throw new ApiError(
-        "Uploaded video english subtitle file not found on server",
-        400
-      );
-    }
-
-    uploadedFiles.push(subtitleEnPath);
-
-    if (!req.body.subtitleAr) {
-      throw new ApiError(
-        "No video arabic subtitle file found in body request",
-        400
-      );
-    }
-    const subtitleArFileName = req.body.subtitleAr;
-    const subtitleArPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "uploads",
-      "subtitles",
-      subtitleArFileName
-    );
-
-    if (!fs.existsSync(subtitleArPath)) {
-      throw new ApiError(
-        "Uploaded video arabic subtitle file not found on server",
-        400
-      );
-    }
-
-    uploadedFiles.push(subtitleArPath);
+    validateUploadedFile({
+      fileName: subtitleArFileName,
+      filePath: subtitleArPath,
+      fileLabel: "video arabic subtitle",
+    });
 
     const subtitleEnJSON = parseSubtitleFile(subtitleEnPath);
     const subtitleArJSON = parseSubtitleFile(subtitleArPath);
@@ -555,20 +623,23 @@ exports.createVideo = asyncHandler(async (req, res, next) => {
 
     // تحقق من الـ playlist
     const playlist = await Playlist.findById(playlistId).session(session);
-    if (!playlist)
+    if (!playlist) {
       throw new ApiError(`Playlist not found with id ${playlistId}`, 404);
+    }
 
-    if (playlist.type === "movie" && episodeId)
+    if (playlist.type === "movie" && episodeId) {
       throw new ApiError(
         "This playlist is a movie, you cannot attach an episode to it.",
         400
       );
+    }
 
-    if (playlist.type === "series" && !episodeId)
+    if (playlist.type === "series" && !episodeId) {
       throw new ApiError(
         "You must provide a valid episode Id when adding a video to a series playlist.",
         400
       );
+    }
 
     // تحقق من الـ seasonNumber
     if (seasonNumber) {
@@ -618,11 +689,12 @@ exports.createVideo = asyncHandler(async (req, res, next) => {
       videoNumber: videoNumber ? +videoNumber : null,
     }).session(session);
 
-    if (existingVideo)
+    if (existingVideo) {
       throw new ApiError(
         `A video already exists in this playlist with season ${seasonNumber}, episode ${episodeId || "N/A"}, and videoNumber ${videoNumber}`,
         400
       );
+    }
 
     // ==== validation for quizzes right answer is exist in answers characters ====
     if (Array.isArray(quizzes) && quizzes.length > 0) {
@@ -660,6 +732,7 @@ exports.createVideo = asyncHandler(async (req, res, next) => {
         itemsArray: flashCards,
         itemNumberField: "flashCardNumber",
         imageTypeLabel: "flash card",
+        method: "create",
       });
       if (!flashRes.ok) throw new ApiError(flashRes.message, 400);
     } catch (err) {
@@ -673,6 +746,7 @@ exports.createVideo = asyncHandler(async (req, res, next) => {
         itemsArray: quizzes,
         itemNumberField: "quizNumber",
         imageTypeLabel: "quiz",
+        method: "create",
       });
       if (!quizRes.ok) throw new ApiError(quizRes.message, 400);
     } catch (err) {
@@ -733,39 +807,24 @@ exports.createVideo = asyncHandler(async (req, res, next) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-
-    // مسح كل الصور المرفوعة لو حصل خطأ
-    uploadedFiles.forEach((filePath) => {
-      try {
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      } catch (error) {
-        console.error(`Failed to delete file ${filePath}: ${error.message}`);
-      }
-    });
-
+    await addToGarbage(uploadedFiles, "Temporary upload failed");
     return next(err);
   }
 });
 
+// @desc    Get list of videos
+// @route    GET /api/v1/videos
+// @access    Private
 exports.getVideos = factory.getAll(Video, "Videos", ["flashCards", "quizzes"]);
 
-exports.getVideo = factory.getOne(Video, ["flashCards", "quizzes"]);
+// @desc    Get specific video by id
+// @route    GET /api/v1/videos/:id
+// @access    Private
+exports.getVideo = factory.getOne(Video, "Videos", ["flashCards", "quizzes"]);
 
-/**
- * Get random videos excluding certain IDs.
- * - videosSize defines how many to fetch (default 20)
- * - excludeIds ensures no duplicates from client cache
- *
- * Steps:
- * 1. Convert excludeIds to ObjectId for MongoDB filtering.
- * 2. Count how many videos are left after excluding the given IDs.
- * 3. Calculate the remaining count after fetching this batch.
- * 4. Fetch a random batch of videos using $sample.
- * 5. Format video documents (add absolute image URL if exists).
- * 6. Calculate how many pages remain based on remaining count.
- * 7. Return response with results, total, remainingPages, and videos.
- */
-
+// @desc    Get list of random videos
+// @route    POST /api/v1/videos/random
+// @access    protect
 exports.getRandomVideos = asyncHandler(async (req, res) => {
   const { videosSize } = req.query;
   const { excludeIds = [] } = req.body;
@@ -812,6 +871,9 @@ exports.getRandomVideos = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Update specific video
+// @route    PUT /api/v1/videos/:id
+// @access    Private
 exports.updateVideo = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const session = await mongoose.startSession();
@@ -819,41 +881,35 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
 
   const uploadedFiles = []; // ملفات جديدة نحذفها لو حصل خطأ
   const oldFilesToDelete = []; // ملفات فيديو/cover/subtitles القديمة نحذفها بعد الـ commit
-  const filesToDeleteAfterCommit = []; // ملفات فلاش كاردز/كوويز اللي المستخدم طلب حذفها
+  // const filesToDeleteAfterCommit = []; // ملفات فلاش كاردز/كوويز اللي المستخدم طلب حذفها
 
   try {
-    // Helper function
-    const pushIfExists = (fileName, folder) => {
-      if (!fileName) return null;
-      const filePath = path.join(
-        __dirname,
-        "..",
-        "..",
-        "uploads",
-        folder,
-        fileName
-      );
-      if (fs.existsSync(filePath)) {
-        uploadedFiles.push(filePath);
-        return filePath;
-      }
-      return null;
-    };
-
     // 1) التعامل مع الملفات الجديدة (فيديو / Subtitles / صور)
-    const videoPath = pushIfExists(req.body.video, "videos");
-    const subtitleEnPath = pushIfExists(req.body.subtitleEn, "subtitles");
-    const subtitleArPath = pushIfExists(req.body.subtitleAr, "subtitles");
-    const videoImagePath = pushIfExists(req.body.videoImage, "videosImages");
+    const videoPath = pushIfExists(req.body.video, "videos", uploadedFiles);
+    const subtitleEnPath = pushIfExists(
+      req.body.subtitleEn,
+      "subtitles",
+      uploadedFiles
+    );
+    const subtitleArPath = pushIfExists(
+      req.body.subtitleAr,
+      "subtitles",
+      uploadedFiles
+    );
+    const videoImagePath = pushIfExists(
+      req.body.videoImage,
+      "videosImages",
+      uploadedFiles
+    );
 
     if (Array.isArray(req.body.flashCardsImages)) {
       req.body.flashCardsImages.forEach((img) =>
-        pushIfExists(img.newName, "flashCards")
+        pushIfExists(img.newName, "flashCards", uploadedFiles)
       );
     }
     if (Array.isArray(req.body.quizzesImages)) {
       req.body.quizzesImages.forEach((img) =>
-        pushIfExists(img.newName, "quizzes")
+        pushIfExists(img.newName, "quizzes", uploadedFiles)
       );
     }
 
@@ -903,9 +959,11 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       "episodeId"
     )
       ? req.body.episodeId
-      : video.episodeId
-        ? String(video.episodeId)
-        : null;
+      : playlist.type === "movie"
+        ? null
+        : video.episodeId
+          ? String(video.episodeId)
+          : null;
 
     if (playlist.type === "series" && !resultingEpisodeId) {
       throw new ApiError(
@@ -1011,6 +1069,7 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
         itemsArray: req.body.flashCards,
         itemNumberField: "flashCardNumber",
         imageTypeLabel: "flash card",
+        method: "update",
       });
       if (!flashRes.ok) throw new ApiError(flashRes.message, 400);
     } catch (err) {
@@ -1023,6 +1082,7 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
         itemsArray: req.body.quizzes,
         itemNumberField: "quizNumber",
         imageTypeLabel: "quiz",
+        method: "update",
       });
       if (!quizRes.ok) throw new ApiError(quizRes.message, 400);
     } catch (err) {
@@ -1139,14 +1199,104 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
 
     await video.save({ session });
 
-    // 9) إضافة flashCards جديدة
+    // === تحديث flashCards ===
     if (Array.isArray(req.body.flashCards) && req.body.flashCards.length > 0) {
-      const flashCardsWithVideo = req.body.flashCards.map((fc) => ({
-        ...fc,
-        videoId: video._id,
-      }));
-      await FlashCard.insertMany(flashCardsWithVideo, { session });
+      await Promise.all(
+        req.body.flashCards.map(async (fc) => {
+          // 🔹 حالة التحديث
+          if (fc._id) {
+            const existingCard = await FlashCard.findOne({
+              _id: fc._id,
+              videoId: video._id,
+            }).session(session);
+
+            if (!existingCard) return null;
+
+            // لو الصورة الجديدة اتبعت فعلاً
+            if (
+              fc._newImageUploaded &&
+              fc.image &&
+              existingCard.image &&
+              fc.image !== existingCard.image
+            ) {
+              oldFilesToDelete.push(
+                path.join(
+                  __dirname,
+                  "..",
+                  "..",
+                  "uploads",
+                  "flashCards",
+                  existingCard.image
+                )
+              );
+            }
+
+            // نحدث البيانات
+            await FlashCard.updateOne(
+              { _id: fc._id, videoId: video._id },
+              { $set: { ...fc, videoId: video._id } },
+              { session }
+            );
+          } else {
+            // 🔹 حالة الإضافة الجديدة
+            await FlashCard.create([{ ...fc, videoId: video._id }], {
+              session,
+            });
+          }
+        })
+      );
     }
+
+    // === تحديث quizzes ===
+    if (Array.isArray(req.body.quizzes) && req.body.quizzes.length > 0) {
+      await Promise.all(
+        req.body.quizzes.map(async (qz) => {
+          if (qz._id) {
+            const existingQuiz = await Quiz.findOne({
+              _id: qz._id,
+              videoId: video._id,
+            }).session(session);
+
+            if (!existingQuiz) return null;
+
+            if (
+              qz._newImageUploaded &&
+              qz.image &&
+              existingQuiz.image &&
+              qz.image !== existingQuiz.image
+            ) {
+              oldFilesToDelete.push(
+                path.join(
+                  __dirname,
+                  "..",
+                  "..",
+                  "uploads",
+                  "quizzes",
+                  existingQuiz.image
+                )
+              );
+            }
+
+            await Quiz.updateOne(
+              { _id: qz._id, videoId: video._id },
+              { $set: { ...qz, videoId: video._id } },
+              { session }
+            );
+          } else {
+            await Quiz.create([{ ...qz, videoId: video._id }], { session });
+          }
+        })
+      );
+    }
+
+    // // 9) إضافة flashCards جديدة
+    // if (Array.isArray(req.body.flashCards) && req.body.flashCards.length > 0) {
+    //   const flashCardsWithVideo = req.body.flashCards.map((fc) => ({
+    //     ...fc,
+    //     videoId: video._id,
+    //   }));
+    //   await FlashCard.insertMany(flashCardsWithVideo, { session });
+    // }
 
     // 10) حذف flashCards
     if (
@@ -1167,7 +1317,7 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
 
       flashCardsToDelete.forEach((fc) => {
         if (fc.image)
-          filesToDeleteAfterCommit.push(
+          oldFilesToDelete.push(
             path.join(__dirname, "..", "..", "uploads", "flashCards", fc.image)
           );
       });
@@ -1178,14 +1328,14 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       }).session(session);
     }
 
-    // 11) إضافة quizzes جديدة
-    if (Array.isArray(req.body.quizzes) && req.body.quizzes.length > 0) {
-      const quizzesWithVideo = req.body.quizzes.map((qz) => ({
-        ...qz,
-        videoId: video._id,
-      }));
-      await Quiz.insertMany(quizzesWithVideo, { session });
-    }
+    // // 11) إضافة quizzes جديدة
+    // if (Array.isArray(req.body.quizzes) && req.body.quizzes.length > 0) {
+    //   const quizzesWithVideo = req.body.quizzes.map((qz) => ({
+    //     ...qz,
+    //     videoId: video._id,
+    //   }));
+    //   await Quiz.insertMany(quizzesWithVideo, { session });
+    // }
 
     // 12) حذف quizzes
     if (
@@ -1206,7 +1356,7 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
 
       quizzesToDelete.forEach((qz) => {
         if (qz.image)
-          filesToDeleteAfterCommit.push(
+          oldFilesToDelete.push(
             path.join(__dirname, "..", "..", "uploads", "quizzes", qz.image)
           );
       });
@@ -1217,32 +1367,38 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
       }).session(session);
     }
 
+    await addToGarbage(
+      oldFilesToDelete,
+      "Old video files replaced during update",
+      session
+    );
+
     // 13) commit
     await session.commitTransaction();
     session.endSession();
 
     // 14) حذف الملفات القديمة بعد الـ commit
-    await Promise.all(
-      oldFilesToDelete.map(async (filePath) => {
-        try {
-          if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
-        } catch (err) {
-          console.error(
-            `Failed to delete old file ${filePath}: ${err.message}`
-          );
-        }
-      })
-    );
+    // await Promise.all(
+    //   oldFilesToDelete.map(async (filePath) => {
+    //     try {
+    //       if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+    //     } catch (err) {
+    //       console.error(
+    //         `Failed to delete old file ${filePath}: ${err.message}`
+    //       );
+    //     }
+    //   })
+    // );
 
-    await Promise.all(
-      filesToDeleteAfterCommit.map(async (filePath) => {
-        try {
-          if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
-        } catch (err) {
-          console.error(`Failed to delete file ${filePath}: ${err.message}`);
-        }
-      })
-    );
+    // await Promise.all(
+    //   filesToDeleteAfterCommit.map(async (filePath) => {
+    //     try {
+    //       if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+    //     } catch (err) {
+    //       console.error(`Failed to delete file ${filePath}: ${err.message}`);
+    //     }
+    //   })
+    // );
 
     // 15) جلب الفيديو النهائي
     const finalVideo = await Video.findById(video._id)
@@ -1295,35 +1451,45 @@ exports.updateVideo = asyncHandler(async (req, res, next) => {
     await session.abortTransaction();
     session.endSession();
 
-    // حذف الملفات الجديدة اللي اترفعت لكن فشلنا
-    await Promise.all(
-      uploadedFiles.map(async (filePath) => {
-        try {
-          if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
-        } catch (error) {
-          console.error(
-            `Failed to delete uploaded file ${filePath}: ${error.message}`
-          );
-        }
-      })
+    // // حذف الملفات الجديدة اللي اترفعت لكن فشلنا
+    // await Promise.all(
+    //   uploadedFiles.map(async (filePath) => {
+    //     try {
+    //       if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+    //     } catch (error) {
+    //       console.error(
+    //         `Failed to delete uploaded file ${filePath}: ${error.message}`
+    //       );
+    //     }
+    //   })
+    // );
+
+    await addToGarbage(
+      uploadedFiles,
+      "New video files rolledback because exist error in the system"
     );
 
     return next(err);
   }
 });
 
+// @desc    Delete specific video
+// @route    DELETE /api/v1/videos/:id
+// @access    Private
 exports.deleteVideo = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const session = await mongoose.startSession();
   session.startTransaction();
+  const deletedFiles = [];
 
   try {
     const video = await Video.findById(id).session(session);
 
     if (!video) {
-      await session.abortTransaction();
-      session.endSession();
-      return next(new ApiError(`No video for this id ${id}`, 404));
+      // await session.abortTransaction();
+      // session.endSession();
+      // return next(new ApiError(`No video for this id ${id}`, 404));
+      throw new ApiError(`No video for this id ${id}`, 404);
     }
 
     // حذف الفيديو نفسه
@@ -1335,14 +1501,16 @@ exports.deleteVideo = asyncHandler(async (req, res, next) => {
         __dirname,
         `../../uploads/videosImages/${video.image}`
       );
-      if (fs.existsSync(oldImagePath)) await fs.promises.unlink(oldImagePath);
+      deletedFiles.push(oldImagePath);
+      // if (fs.existsSync(oldImagePath)) await fs.promises.unlink(oldImagePath);
     }
     if (video.video) {
       const oldVideoPath = path.join(
         __dirname,
         `../../uploads/videos/${video.video}`
       );
-      if (fs.existsSync(oldVideoPath)) await fs.promises.unlink(oldVideoPath);
+      deletedFiles.push(oldVideoPath);
+      // if (fs.existsSync(oldVideoPath)) await fs.promises.unlink(oldVideoPath);
     }
 
     // حذف FlashCards المرتبطة بالفيديو
@@ -1354,7 +1522,8 @@ exports.deleteVideo = asyncHandler(async (req, res, next) => {
             __dirname,
             `../../uploads/flashCards/${card.image}`
           );
-          if (fs.existsSync(imagePath)) await fs.promises.unlink(imagePath);
+          deletedFiles.push(imagePath);
+          // if (fs.existsSync(imagePath)) await fs.promises.unlink(imagePath);
         }
         await FlashCard.findByIdAndDelete(card._id).session(session);
       })
@@ -1369,10 +1538,17 @@ exports.deleteVideo = asyncHandler(async (req, res, next) => {
             __dirname,
             `../../uploads/quizzes/${quiz.image}`
           );
-          if (fs.existsSync(imagePath)) await fs.promises.unlink(imagePath);
+          deletedFiles.push(imagePath);
+          // if (fs.existsSync(imagePath)) await fs.promises.unlink(imagePath);
         }
         await Quiz.findByIdAndDelete(quiz._id).session(session);
       })
+    );
+
+    addToGarbage(
+      deletedFiles,
+      `Video #${video._id} and related files deleted`,
+      session
     );
 
     await session.commitTransaction();

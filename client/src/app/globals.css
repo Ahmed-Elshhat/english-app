@@ -10,6 +10,52 @@ a {
   text-decoration: none;
 }
 
+.swal2-popup.custom-popup {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 0 20px rgba(0, 200, 150, 0.15);
+  padding: 25px !important;
+}
+
+.swal2-title.custom-title {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+  font-size: 1.4rem !important;
+}
+
+.swal2-html-container.custom-text {
+  color: #cbd5e1 !important;
+  font-size: 1rem !important;
+}
+
+.swal2-confirm.custom-confirm-btn {
+  background: linear-gradient(135deg, #00c896, #0d89f2, #0044ff) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 10px 22px !important;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.swal2-confirm.custom-confirm-btn:hover {
+  opacity: 0.85;
+  transform: scale(1.05);
+}
+
+.swal2-cancel.custom-cancel-btn {
+  background: #334155 !important;
+  color: #e2e8f0 !important;
+  border-radius: 8px !important;
+  padding: 10px 22px !important;
+  border: 1px solid #475569 !important;
+  transition: 0.2s;
+}
+
+.swal2-cancel.custom-cancel-btn:hover {
+  background: #475569 !important;
+}
 
 
 

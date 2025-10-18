@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import "./globals.css";
-import WindowProvider from "@/context/windowContext";
-import MenuProvider from "@/context/MenuContext";
+import ClientProviders from "./ClientProviders";
 
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
@@ -22,9 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${cairo.className} antialiased`}>
-        <WindowProvider>
-          <MenuProvider>{children}</MenuProvider>
-        </WindowProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

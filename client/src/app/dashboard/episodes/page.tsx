@@ -1,6 +1,5 @@
 "use client";
 import { EPISODES } from "@/Api/Api";
-import { Axios } from "@/Api/axios";
 import CopyButton from "@/components/CopyButton/CopyButton";
 import Loading from "@/components/Loading/Loading";
 import { EpisodeSchema } from "@/Types/app";
@@ -9,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FaEye, FaTrash } from "react-icons/fa";
 import { MdEditSquare } from "react-icons/md";
 import "./episodes.scss";
+import { AxiosClient } from "@/Api/axiosClient";
 
 function ShowEpisodesPage() {
   const [episodes, setEpisodes] = useState<EpisodeSchema[]>([]);
@@ -25,6 +25,7 @@ function ShowEpisodesPage() {
   const [searchBy, setSearchBy] = useState("title");
   const [sortOrder, setSortOrder] = useState("newest");
   const stopLoading = useRef(0);
+  const axios = AxiosClient();
 
   useEffect(() => {
     const getEpisodes = async () => {
@@ -45,7 +46,7 @@ function ShowEpisodesPage() {
           : "";
 
       try {
-        const res = await Axios.get(
+        const res = await axios.get(
           `${EPISODES}?page=1&limit=30${sortOrderQuery}${keyword}${_id}`
         );
         if (res.status === 200) {
@@ -78,7 +79,7 @@ function ShowEpisodesPage() {
     ) {
       setLoading({ status: true, type: "bottom" });
       try {
-        const res = await Axios.get(
+        const res = await axios.get(
           `${EPISODES}?page=${paginationResults.next}&limit=30`
         );
         if (res.status === 200) {
@@ -102,7 +103,7 @@ function ShowEpisodesPage() {
   const handleDelete = async (id: string) => {
     setLoading({ status: true, type: "normal" });
     try {
-      const res = await Axios.delete(`${EPISODES}/${id}`);
+      const res = await axios.delete(`${EPISODES}/${id}`);
       if (res.status === 204) {
         setEpisodes(episodes.filter((episode) => episode._id !== id));
         setLoading({ status: false, type: "normal" });

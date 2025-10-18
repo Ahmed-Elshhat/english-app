@@ -11,7 +11,9 @@ const rateLimit = require("express-rate-limit");
 const hpp = require("hpp");
 const passport = require("passport");
 const session = require("express-session");
+const bodyParser = require("body-parser");
 const { swaggerUi, specs } = require("../swagger");
+require("./cron/garbageCron");
 
 dotenv.config({ path: "config.env" });
 require("./config/passport");
@@ -44,6 +46,7 @@ folders.forEach((folder) => {
 const mountRoutes = require("./routes");
 const User = require("./models/userModel");
 const PlanModel = require("./models/planModel");
+const { callbackPayment } = require("./controllers/paymentController");
 // Connect With DB
 dbConnection();
 
@@ -69,6 +72,17 @@ app.set("trust proxy", true);
 // compress all responses
 app.use(compression());
 
+// ✅ Webhook Callback (Paymob)
+app.post(
+  "/api/v1/payments/callback-payment",
+  bodyParser.json({
+    verify: (req, res, buf) => {
+      req.rawBody = buf; // نحفظ الـ raw body هنا
+    },
+  }),
+  callbackPayment
+);
+
 // Middleware
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
@@ -76,11 +90,6 @@ app.use(express.json());
 // app.use(express.json({ limit: '20kb' }));
 
 app.use(express.static(path.join(__dirname, "..", "uploads")));
-// // app.use("/uploads", express.static("uploads"));
-// app.use("/videos", express.static("videos"));
-// app.use("/images", express.static("images"));
-// app.use("/audios", express.static("audios"));
-// app.use("/others", express.static("others"));
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -89,15 +98,13 @@ if (process.env.NODE_ENV === "development") {
 
 // Limit each IP to 5 requests per `window` (here, per 5 minutes)
 const limiter = rateLimit({
-  windowMs: 10 * 1000, // 5 minutes
+  windowMs: 5 * 60 * 1000, // 5 minutes
   max: 5,
   message:
     "Too many accounts created from this IP, please try again after an 5 minutes",
 });
 
 // Apply the rate limiting middleware to all requests
-// app.use('/api/v1/auth/login', limiter);
-// app.use('/api/v1/auth/signup', limiter);
 const authRoutes = ["/api/v1/auth/login", "/api/v1/auth/signup"];
 authRoutes.forEach((route) => {
   app.use(route, limiter);
@@ -137,20 +144,26 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 // Mount Routes
 mountRoutes(app);
 
-async function addAdmin() {
-  let admin = await User.findOne({ email: "a7medelshhat@gmail.com" });
+async function addAdmin({ name, email }) {
+  let admin = await User.findOne({ email });
   if (!admin) {
     await User.create({
-      name: "Ahmed",
-      email: "a7medelshhat@gmail.com",
+      name,
+      email,
       password: "pass123",
       role: "admin",
-      points: 0,
     });
   }
 }
 
-addAdmin();
+const admins = [
+  { name: "Ahmed Mohamed Elshhat", email: "a7medelshhat@gmail.com" },
+  { name: "Lail", email: "lailalbably@gmail.com" },
+];
+
+admins.forEach((user_) => {
+  addAdmin({ name: user_.name, email: user_.email });
+});
 
 app.all(/(.*)/, (req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));

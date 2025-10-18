@@ -2,14 +2,13 @@ const mongoose = require("mongoose");
 
 const signupTrackerSchema = new mongoose.Schema(
   {
-    email: {
-      type: String,
-      required: true,
-      lowercase: true,
+    emails: {
+      type: [String],
+      default: [],
     },
-    ipAddress: {
-      type: String,
-      required: true,
+    ipAddresses: {
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true }

@@ -1,21 +1,22 @@
 "use client";
 import { useEffect, useState } from "react";
 import { EpisodeSchema } from "@/Types/app";
-import { Axios } from "@/Api/axios";
 import { EPISODES } from "@/Api/Api";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Loading/Loading";
 import "./showEpisodeDetails.scss";
 import { MdLiveTv } from "react-icons/md";
+import { AxiosClient } from "@/Api/axiosClient";
 
 function ShowEpisodeDetailsPage() {
   const { id } = useParams();
   const [episode, setEpisode] = useState<EpisodeSchema | null>(null);
+  const axios = AxiosClient();
 
   useEffect(() => {
     const fetchEpisode = async () => {
       try {
-        const { data } = await Axios.get(`${EPISODES}/${id}`);
+        const { data } = await axios.get(`${EPISODES}/${id}`);
         setEpisode(data.data);
         console.log("Episode fetched successfully:", data.data);
       } catch (error) {

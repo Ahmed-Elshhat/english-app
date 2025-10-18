@@ -7,6 +7,7 @@ const flashCardRoute = require("./flashCardRoute");
 const quizRoute = require("./quizRoute");
 const employeeRoute = require("./employeeRoute")
 const planRoute = require("./planRoute")
+const paymentRoute = require("./paymentRoute")
 
 const mountRoutes = (app) => {
   app.use("/api/v1/auth", authRoute);
@@ -18,6 +19,7 @@ const mountRoutes = (app) => {
   app.use("/api/v1/flashCards", flashCardRoute);
   app.use("/api/v1/quizzes", quizRoute);
   app.use("/api/v1/plans", planRoute);
+  app.use("/api/v1/payments", paymentRoute);
 };
 
 module.exports = mountRoutes;

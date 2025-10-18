@@ -2,12 +2,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import "./addPlaylist.scss";
 import Loading from "@/components/Loading/Loading";
-import { Axios } from "@/Api/axios";
 import { PLAYLISTS } from "@/Api/Api";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
+import { AxiosClient } from "@/Api/axiosClient";
 
 function AddPlaylistPage() {
   const [form, setForm] = useState({
@@ -30,6 +30,7 @@ function AddPlaylistPage() {
   const [flag, setFlag] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const axios = AxiosClient();
 
   useEffect(() => {
     validate();
@@ -216,14 +217,14 @@ function AddPlaylistPage() {
       formData.append("seasons", JSON.stringify(form.seasons));
     }
 
-    console.log("type", form.type)
-    console.log("title", form.title)
-    console.log("description", form.description)
-    console.log("image", form.image)
-    console.log("seasons", JSON.stringify(form.seasons))
+    console.log("type", form.type);
+    console.log("title", form.title);
+    console.log("description", form.description);
+    console.log("image", form.image);
+    console.log("seasons", JSON.stringify(form.seasons));
 
     try {
-      const res = await Axios.post(`${PLAYLISTS}`, formData, {
+      const res = await axios.post(`${PLAYLISTS}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

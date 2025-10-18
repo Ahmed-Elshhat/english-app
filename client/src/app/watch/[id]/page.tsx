@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import "./watch.scss";
 import Header from "@/components/Header/Header";
@@ -5,8 +6,104 @@ import { RiRepeat2Line } from "react-icons/ri";
 import { IoPause } from "react-icons/io5";
 import Link from "next/link";
 import { MdPlayDisabled } from "react-icons/md";
+import { useEffect, useRef, useState } from "react";
+
+interface Cue {
+  id: string;
+  startTime: number;
+  endTime: number;
+  text: string;
+}
 
 function WatchPage() {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [subtitlesEn, setSubtitlesEn] = useState<Cue[]>([
+    {
+      id: "1",
+      startTime: 0,
+      endTime: 4000,
+      text: "Hello, how are you?",
+    },
+    {
+      id: "2",
+      startTime: 4000,
+      endTime: 7000,
+      text: "I'm fine, thank you.",
+    },
+    {
+      id: "3",
+      startTime: 7000,
+      endTime: 10000,
+      text: "Welcome to our English learning app.",
+    },
+  ]);
+  const [subtitlesAr, setSubtitlesAr] = useState<Cue[]>([
+    {
+      id: "1",
+      startTime: 0,
+      endTime: 4000,
+      text: "مرحباً، كيف حالك؟",
+    },
+    {
+      id: "2",
+      startTime: 4000,
+      endTime: 7000,
+      text: "أنا بخير، شكراً لك.",
+    },
+    {
+      id: "3",
+      startTime: 7000,
+      endTime: 10000,
+      text: "أهلاً بك في تطبيق تعلم الإنجليزية.",
+    },
+  ]);
+  const [currentTextEn, setCurrentTextEn] = useState("");
+  const [currentTextAr, setCurrentTextAr] = useState("");
+  const [visibleEn, setVisibleEn] = useState(false);
+  const [visibleAr, setVisibleAr] = useState(false);
+
+  useEffect(() => {
+    let animationFrameId: number;
+
+    const updateSubtitles = () => {
+      if (!videoRef.current) {
+        animationFrameId = requestAnimationFrame(updateSubtitles);
+        return;
+      }
+
+      const currentTime = videoRef.current.currentTime * 1000;
+
+      const en = subtitlesEn.find(
+        (cue) => currentTime >= cue.startTime && currentTime <= cue.endTime
+      );
+      const ar = subtitlesAr.find(
+        (cue) => currentTime >= cue.startTime && currentTime <= cue.endTime
+      );
+
+      if (en?.text !== currentTextEn) {
+        setVisibleEn(false);
+        setTimeout(() => {
+          setCurrentTextEn(en ? en.text : "");
+          setVisibleEn(!!en);
+        }, 150); // زمن خفيف للـ fade-out قبل إدخال النص الجديد
+      }
+
+      if (ar?.text !== currentTextAr) {
+        setVisibleAr(false);
+        setTimeout(() => {
+          setCurrentTextAr(ar ? ar.text : "");
+          setVisibleAr(!!ar);
+        }, 150);
+      }
+
+      animationFrameId = requestAnimationFrame(updateSubtitles);
+    };
+
+    animationFrameId = requestAnimationFrame(updateSubtitles);
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [subtitlesEn, subtitlesAr, currentTextEn, currentTextAr]);
+
   return (
     <div className="Watch">
       <Header />
@@ -27,8 +124,8 @@ function WatchPage() {
             </div>
             {/* Video Player */}
             <div className="video-player">
-              <video controls poster="/images/poster.png">
-                <source src="/videos/video1.mp4" type="video/mp4" />
+              <video ref={videoRef} controls poster="/images/poster.png">
+                <source src="/videos/video2.mp4" type="video/mp4" />
               </video>
             </div>
             <div className="controls">
@@ -40,11 +137,13 @@ function WatchPage() {
                 <IoPause /> S.S
               </button>
             </div>
-            <p className="en">
-              But now <span className="highlight">I&apos;m out of time</span>.
+            <p className="en" /*  style={{ opacity: visibleEn ? "1" : "0" }} */>
+              {/* But now <span className="highlight">I&apos;m out of time</span>. */}
+              {currentTextEn}
             </p>
-            <p className="ar">
-              ولكن الآن <span className="highlight">لقد نفد وقتي</span>.
+            <p className="ar" /*  style={{ opacity: visibleAr ? "1" : "0" }} */>
+              {/* ولكن الآن <span className="highlight">لقد نفد وقتي</span>. */}
+              {currentTextAr}
             </p>
           </div>
 
@@ -919,3 +1018,22 @@ function WatchPage() {
 }
 
 export default WatchPage;
+
+// useEffect(() => {
+//   const interval = setInterval(() => {
+//     if (!videoRef.current) return;
+//     const currentTime = videoRef.current.currentTime * 1000;
+
+//     const en = subtitlesEn.find(
+//       (cue) => currentTime >= cue.startTime && currentTime <= cue.endTime
+//     );
+//     const ar = subtitlesAr.find(
+//       (cue) => currentTime >= cue.startTime && currentTime <= cue.endTime
+//     );
+
+//     setCurrentTextEn(en ? en.text : "");
+//     setCurrentTextAr(ar ? ar.text : "");
+//   }, 300); // يحدث كل 0.3 ثانية
+
+//   return () => clearInterval(interval);
+// }, [subtitlesEn, subtitlesAr]);

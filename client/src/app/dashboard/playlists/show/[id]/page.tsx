@@ -2,12 +2,12 @@
 import { useEffect, useState } from "react";
 import "./showPlaylistDetails.scss";
 import { PlaylistSchema } from "@/Types/app";
-import { Axios } from "@/Api/axios";
 import { PLAYLISTS } from "@/Api/Api";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Loading/Loading";
 import Image from "next/image";
 import { RiPlayList2Fill } from "react-icons/ri";
+import { AxiosClient } from "@/Api/axiosClient";
 
 function ShowPlaylistDetailsPage() {
   const { id } = useParams();
@@ -15,10 +15,12 @@ function ShowPlaylistDetailsPage() {
   // const id = params.id;
   const [playlist, setPlaylist] = useState<PlaylistSchema | null>(null);
 
+  const axios = AxiosClient();
+
   useEffect(() => {
     const fetchPlaylist = async () => {
       try {
-        const { data } = await Axios.get(`${PLAYLISTS}/${id}`);
+        const { data } = await axios.get(`${PLAYLISTS}/${id}`);
         setPlaylist(data.data);
         console.log("Playlist fetched successfully:", data.data);
       } catch (error) {

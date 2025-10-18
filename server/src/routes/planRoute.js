@@ -7,6 +7,7 @@ const {
   getPlans,
   getPlan,
   updatePlan,
+  parseJSON,
 } = require("../controllers/planController");
 
 // Import validation middlewares to validate requests for each route
@@ -35,6 +36,7 @@ router
   .put(
     AuthService.protect,
     AuthService.allowedTo("admin"),
+    parseJSON,
     updatePlanValidator,
     updatePlan
   );

@@ -2,16 +2,13 @@
 import Link from "next/link";
 import { useMenu } from "@/context/MenuContext";
 import { useWindow } from "@/context/windowContext";
-// import { useAppSelector } from "@/Redux/app/hooks";
 import SidebarLinks from "../NavLink";
 import { IoMenu } from "react-icons/io5";
 import "./Sidebar.scss";
+import { useAppSelector } from "@/Redux/app/hooks";
 
 function SideBar() {
-  // const { data } = useAppSelector((state) => state.user);
-  const data = {
-    role: "admin",
-  };
+  const { data } = useAppSelector((state) => state.user);
   const links = SidebarLinks();
   const menu = useMenu();
   const windowSize = useWindow();

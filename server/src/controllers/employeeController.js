@@ -118,6 +118,6 @@ exports.createEmployee = factory.createOne(Employee, "Employees");
 exports.updateEmployee = factory.updateOne(Employee);
 
 // @desc    Delete specific employee
-// @route    PUT /api/v1/employees/:id
+// @route    DELETE /api/v1/employees/:id
 // @access    Private
 exports.deleteEmployee = factory.deleteOne(Employee);

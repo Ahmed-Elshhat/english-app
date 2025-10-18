@@ -1,12 +1,12 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Axios } from "@/Api/axios";
 import { PLAYLISTS } from "@/Api/Api";
 import { PlaylistSchema } from "@/Types/app";
 import { RiPlayList2Fill } from "react-icons/ri";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./PlaylistsCards.scss";
+import { AxiosClient } from "@/Api/axiosClient";
 
 // Type definition for the component props
 type PlaylistCards = {
@@ -50,8 +50,9 @@ function PlaylistCards({
     ) {
       setLoading(true); // Start loading state
       try {
+        const axios = AxiosClient();
         // Make POST request to fetch random playlists
-        const res = await Axios.post(
+        const res = await axios.post(
           `${PLAYLISTS}/random?playlistsType=${
             playlistsType || "series"
           }&playlistsSize=3`,

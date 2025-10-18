@@ -1,6 +1,14 @@
 const asyncHandler = require("express-async-handler");
+const path = require("path");
+const fs = require("fs");
+const parser = require("subtitles-parser");
 const ApiError = require("../utils/apiError");
 const ApiFeatures = require("../utils/apiFeatures");
+
+function parseSubtitleFile(filePath) {
+  const content = fs.readFileSync(filePath, "utf8");
+  return parser.fromSrt(content, true);
+}
 
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -62,7 +70,7 @@ exports.createOne = (Model, modelName) =>
     res.status(201).json({ data: documentObject });
   });
 
-exports.getOne = (Model, populationOpt) =>
+exports.getOne = (Model, modelName, populationOpt) =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     // 1) Build query
@@ -88,13 +96,94 @@ exports.getOne = (Model, populationOpt) =>
       return next(new ApiError(`No document for this id ${id}`, 404));
     }
 
+    let subtitleEnJSON = null;
+    let subtitleArJSON = null;
+    if (modelName === "Videos") {
+      try {
+        if (document.subtitleEn) {
+          const videoSubtitleEnPath = path.join(
+            __dirname,
+            "..",
+            "..",
+            "uploads",
+            "subtitles",
+            document.subtitleEn
+          );
+          if (fs.existsSync(videoSubtitleEnPath))
+            subtitleEnJSON = parseSubtitleFile(videoSubtitleEnPath);
+        }
+      } catch (err) {
+        console.warn("Failed to parse subtitleEn:", err.message);
+      }
+
+      try {
+        if (document.subtitleAr) {
+          const videoSubtitleArPath = path.join(
+            __dirname,
+            "..",
+            "..",
+            "uploads",
+            "subtitles",
+            document.subtitleAr
+          );
+          if (fs.existsSync(videoSubtitleArPath))
+            subtitleArJSON = parseSubtitleFile(videoSubtitleArPath);
+        }
+      } catch (err) {
+        console.warn("Failed to parse subtitleAr:", err.message);
+      }
+    }
+
     const documentObject = document.toObject();
 
     delete documentObject.accessToken;
     delete documentObject.password;
     delete documentObject.__v;
 
-    res.status(200).json({ data: documentObject });
+    res.status(200).json({
+      data: documentObject,
+      ...(subtitleEnJSON ? { subtitleEnJSON } : {}),
+      ...(subtitleArJSON ? { subtitleArJSON } : {}),
+    });
+
+    /* 
+      1. استخدم lean() لتحسين الأداء في الـ query
+
+      بدل:
+
+      let query = Model.findById(id);
+
+
+      خليها:
+
+      let query = Model.findById(id).lean();
+
+
+      ده بيرجع object عادي بدل document من Mongoose، فمش هتحتاج:
+
+      const documentObject = document.toObject();
+
+
+      وهيخلي الكود أسرع وأخف في الذاكرة.
+    */
+
+    /* 
+      2. استخدم دالة omit لتقليل الحذف اليدوي
+
+      بدل ما تعمل:
+
+      delete documentObject.accessToken;
+      delete documentObject.password;
+      delete documentObject.__v;
+
+
+      تقدر تستخدم مكتبة زي lodash (لو بتستخدمها أصلًا):
+
+      const documentObject = _.omit(document, ['accessToken', 'password', '__v']);
+
+
+      ده أنظف وأوضح.
+    */
   });
 
 exports.getAll = (Model, searchKeyWord, populationOpt) =>

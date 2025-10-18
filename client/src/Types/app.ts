@@ -20,15 +20,18 @@ export type LoginFormState = {
 
 // User Schema
 export type UserSchema = {
+  id: string;
+  _id: string;
   name: string;
   email: string;
   role: string;
+  currentPlan: string;
+  planPurchasedAt: string | Date;
+  planExpiresAt: string | Date;
+  points: number;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
-  points: number;
-  id: string;
-  _id: string;
 };
 
 // getUser Context

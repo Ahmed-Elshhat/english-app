@@ -5,9 +5,9 @@ import { IoClose } from "react-icons/io5";
 import { AxiosError } from "axios";
 import "./addEpisode.scss";
 import Loading from "@/components/Loading/Loading";
-import { Axios } from "@/Api/axios";
 import { EPISODES, PLAYLISTS } from "@/Api/Api";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
+import { AxiosClient } from "@/Api/axiosClient";
 
 function AddEpisodePage() {
   const [form, setForm] = useState({
@@ -22,6 +22,7 @@ function AddEpisodePage() {
   const [flag, setFlag] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const axios = AxiosClient();
 
   useEffect(() => {
     validate();
@@ -122,7 +123,7 @@ function AddEpisodePage() {
     };
 
     try {
-      const res = await Axios.post(`${EPISODES}`, data, {
+      const res = await axios.post(`${EPISODES}`, data, {
         headers: { "Content-Type": "application/json" },
       });
 

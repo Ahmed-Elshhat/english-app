@@ -13,6 +13,7 @@ const Employee = require("../models/employeeModel");
 // @route   POST /api/v1/auth/signup
 // @access  Public
 exports.signup = asyncHandler(async (req, res, next) => {
+  const { name, email, password } = req.body;
   // Step 1: Extract user's IP address (supports both proxies and direct connections)
   let ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "")
     .split(",")[0]
@@ -24,7 +25,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
 
   // Step 3: Check if this IP or email already signed up before
   const previousSignup = await SignupTracker.findOne({
-    $or: [{ ipAddress: ip }, { email: req.body.email }],
+    $or: [{ ipAddresses: ip }, { emails: email }],
   });
 
   // Step 4: Decide whether to give trial points (first-time users only)
@@ -32,31 +33,25 @@ exports.signup = asyncHandler(async (req, res, next) => {
 
   // Step 5: Create the new user document
   const user = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
+    name,
+    email,
+    password,
     points: shouldGiveTrialPoints ? 5 : 0, // Give 5 free points for first signup
   });
 
   // Step 6: Record signup attempt or update existing record
   if (shouldGiveTrialPoints) {
     await SignupTracker.create({
-      email: req.body.email,
-      ipAddress: ip,
+      emails: [email],
+      ipAddresses: [ip],
     });
   } else {
-    let save = false;
-    if (previousSignup.email == null) {
-      previousSignup.email = req.body.email;
-      save = true;
-    }
-    if (previousSignup.ipAddress == null) {
-      previousSignup.ipAddress = ip;
-      save = true;
-    }
-    if (save) {
-      await previousSignup.save();
-    }
+    await SignupTracker.updateOne(
+      { _id: previousSignup._id },
+      {
+        $addToSet: { emails: email, ipAddresses: ip },
+      }
+    );
   }
 
   // Step 7: Generate JWT token for authentication
@@ -129,7 +124,7 @@ exports.googleCallback = asyncHandler(async (req, res) => {
     // Step 5: Destroy session and redirect to frontend
     req.session.destroy(() => {
       res.clearCookie("connect.sid");
-      res.redirect("http://localhost:3000");
+      res.redirect("http://localhost:3000/playlists/series");
     });
   });
 });

@@ -26,41 +26,129 @@ exports.createUser = factory.createOne(User, "Users");
 // @desc    Update specific user
 // @route    PUT /api/v1/users/:id
 // @access    protected
+// exports.updateUser = asyncHandler(async (req, res, next) => {
+//   const { id } = req.params;
+//   const { name } = req.body;
+//   const points = req.body.points != null ? Number(req.body.points) : null;
+//   const currentUser = req.user;
+
+//   let user = await User.findById(id);
+
+//   if (!user) {
+//     user = await Employee.findById(id);
+//   }
+
+//   if (!user) {
+//     return next(new ApiError(`No user for this id ${req.params.id}`, 404));
+//   }
+
+//   if (name != null && String(currentUser.id) !== id) {
+//     return next(
+//       new ApiError("You are not allowed to change this user's name", 400)
+//     );
+//   }
+
+//   if (points != null) {
+//     const isNotAdmin = currentUser.role !== "admin";
+//     const targetIsAdminOrEmp = ["employee", "admin"].includes(user.role);
+//     if (isNotAdmin || targetIsAdminOrEmp) {
+//       return next(new ApiError("You are not allowed to change points", 400));
+//     }
+//   }
+
+//   if (name != null) user.name = name;
+//   if (points != null) user.points = points;
+
+//   await user.save();
+
+//   const documentObject = user.toObject();
+//   delete documentObject.accessToken;
+//   delete documentObject.password;
+//   delete documentObject.__v;
+
+//   res.status(200).json({ data: documentObject });
+// });
+
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { name } = req.body;
+  const { name, currentPlan, planPurchasedAt, planExpiresAt } = req.body;
   const points = req.body.points != null ? Number(req.body.points) : null;
   const currentUser = req.user;
 
+  // Find user
   let user = await User.findById(id);
 
-  if (!user) {
-    user = await Employee.findById(id);
-  }
+  if (!user) user = await Employee.findById(id);
 
-  if (!user) {
-    return next(new ApiError(`No user for this id ${req.params.id}`, 404));
-  }
+  if (!user) return next(new ApiError(`No user for this id ${id}`, 404));
 
+  const isAdmin = currentUser.role === "admin";
+  const targetIsAdminOrEmp = ["employee", "admin"].includes(user.role);
+
+  // ========== NAME VALIDATION ==========
+  // Only the user himself can change his own name
   if (name != null && String(currentUser.id) !== id) {
     return next(
-      new ApiError("You are not allowed to change this user's name", 400)
+      new ApiError("You are not allowed to change this user's name", 403)
     );
   }
 
+  // ========== POINTS VALIDATION ==========
+  // Only admin can change points, and only for regular users
   if (points != null) {
-    const isNotAdmin = currentUser.role !== "admin";
-    const targetIsAdminOrEmp = ["employee", "admin"].includes(user.role);
-    if (isNotAdmin || targetIsAdminOrEmp) {
-      return next(new ApiError("You are not allowed to change points", 400));
+    if (!isAdmin) {
+      return next(
+        new ApiError("Only admins are allowed to change points", 403)
+      );
+    }
+    if (targetIsAdminOrEmp) {
+      return next(
+        new ApiError("Cannot change points for admin or employee users", 403)
+      );
     }
   }
 
+  // ========== PLAN FIELDS VALIDATION ==========
+  // Only admin can change plan-related fields, and only for regular users
+  if (currentPlan != null || planPurchasedAt != null || planExpiresAt != null) {
+    if (!isAdmin) {
+      return next(
+        new ApiError("Only admins are allowed to change plan details", 403)
+      );
+    }
+    if (targetIsAdminOrEmp) {
+      return next(
+        new ApiError(
+          "Cannot change plan details for admin or employee users",
+          403
+        )
+      );
+    }
+  }
+
+  // ========== UPDATE FIELDS ==========
+  // Update name if provided (already validated above)
   if (name != null) user.name = name;
+
+  // Update points if provided (already validated above)
   if (points != null) user.points = points;
+
+  // If plan is being set to 'free', clear the date fields
+  if (currentPlan === "free") {
+    user.currentPlan = "free";
+    user.planPurchasedAt = null;
+    user.planExpiresAt = null;
+  } else {
+    // Update plan fields only if provided
+    if (currentPlan != null) user.currentPlan = currentPlan;
+    if (planPurchasedAt != null)
+      user.planPurchasedAt = new Date(planPurchasedAt);
+    if (planExpiresAt != null) user.planExpiresAt = new Date(planExpiresAt);
+  }
 
   await user.save();
 
+  // Clean response
   const documentObject = user.toObject();
   delete documentObject.accessToken;
   delete documentObject.password;
@@ -226,7 +314,6 @@ exports.verifyChangeEmailCode = asyncHandler(async (req, res, next) => {
 // @route    PUT /api/v1/users/:id
 // @access    Private
 exports.deleteUser = factory.deleteOne(User);
-
 
 // @desc    Get user with token
 // @route    Get /api/v1/users/getOne

@@ -8,6 +8,7 @@ const FlashCard = require("../models/flashCardModel");
 const factory = require("./handlersFactory");
 const ApiError = require("../utils/apiError");
 const { uploadSingleFile } = require("../middlewares/uploadImageMiddleware");
+const addToGarbage = require("../utils/addToGarbage");
 
 exports.uploadFlashCardImage = uploadSingleFile("image");
 
@@ -31,6 +32,16 @@ exports.resizeImage = asyncHandler(async (req, res, next) => {
   // Step 4: Continue
   next();
 });
+
+// دالة مساعدة بدل existsSync
+async function fileExists(filePath) {
+  try {
+    await fs.promises.access(filePath, fs.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 // @desc    Get list of flash cards
 // @route    GET /api/v1/flashCards
@@ -89,8 +100,8 @@ exports.getRandomFlashCards = asyncHandler(async (req, res) => {
 });
 
 // @desc    Update specific flash card
-// @route    PUT /api/v1/flashCard/:id
-// @access    Private
+// @route   PUT /api/v1/flashCard/:id
+// @access  Private
 exports.updateFlashCard = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const newImage = req.body.image;
@@ -101,7 +112,7 @@ exports.updateFlashCard = asyncHandler(async (req, res, next) => {
   let newImagePath = null;
 
   try {
-    // إذا فيه صورة جديدة، تحقق إنها موجودة على الـ disk
+    // ✅ تحقق من وجود الصورة الجديدة (async)
     if (newImage) {
       newImagePath = path.join(
         __dirname,
@@ -111,21 +122,18 @@ exports.updateFlashCard = asyncHandler(async (req, res, next) => {
         "flashCards",
         newImage
       );
-      if (!fs.existsSync(newImagePath)) {
-        throw new ApiError("Uploaded image not found", 404);
-      }
+      const exists = await fileExists(newImagePath);
+      if (!exists) throw new ApiError("Uploaded image not found", 404);
     }
 
-    // جلب الفلاش كارد داخل الـ session
+    // ✅ جلب الفلاش كارد داخل session
     const flashCard = await FlashCard.findById(id).session(session);
-    if (!flashCard) {
-      throw new ApiError("Flash card not found", 404);
-    }
+    if (!flashCard) throw new ApiError("Flash card not found", 404);
 
-    const videoId = req.body.videoId ? req.body.videoId : flashCard.videoId;
-    const flashCardNumber = req.body.flashCardNumber
-      ? req.body.flashCardNumber
-      : flashCard.flashCardNumber;
+    // ✅ منع التكرار في نفس الفيديو
+    const videoId = req.body.videoId || flashCard.videoId;
+    const flashCardNumber =
+      req.body.flashCardNumber || flashCard.flashCardNumber;
 
     const duplicateFlashCard = await FlashCard.findOne({
       videoId,
@@ -139,51 +147,47 @@ exports.updateFlashCard = asyncHandler(async (req, res, next) => {
         400
       );
 
-    // تحديث الفلاش كارد
+    // ✅ تحديث البيانات
     const flashCardUpdated = await FlashCard.findByIdAndUpdate(id, req.body, {
       new: true,
       session,
     });
 
-    const oldImagePath = flashCard.image
-      ? path.join(
-          __dirname,
-          "..",
-          "..",
-          "uploads",
-          "flashCards",
-          flashCard.image
-        )
-      : null;
+    // ✅ لو فيه صورة قديمة ومختلفة عن الجديدة نحطها في Garbage
+    if (newImage && flashCard.image !== newImage) {
+      const oldImagePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "uploads",
+        "flashCards",
+        flashCard.image
+      );
+      const oldExists = await fileExists(oldImagePath);
 
-    // حذف الصورة القديمة إذا موجودة ومختلفة عن الجديدة
-    if (
-      oldImagePath &&
-      flashCard.image !== newImage &&
-      fs.existsSync(oldImagePath)
-    ) {
-      await fs.promises.unlink(oldImagePath);
+      if (oldExists) {
+        await addToGarbage(
+          oldImagePath,
+          `Old flash card image replaced during update (flashCardId: ${flashCard._id})`,
+          session
+        );
+      }
     }
 
-    // لو كل حاجة تمام، commit
     await session.commitTransaction();
     session.endSession();
 
     res.status(200).json({ data: flashCardUpdated });
   } catch (error) {
-    // لو حصل أي خطأ قبل commit -> rollback DB
     await session.abortTransaction();
     session.endSession();
 
-    // لو فيه صورة جديدة تم رفعها على القرص، نحذفها
-    if (newImagePath && fs.existsSync(newImagePath)) {
-      try {
-        await fs.promises.unlink(newImagePath);
-      } catch (err) {
-        console.error(
-          `Failed to delete new image after rollback: ${err.message}`
-        );
-      }
+    // ⚠️ لو الصورة الجديدة اترفعت قبل الفشل → نحطها في Garbage
+    if (newImagePath && (await fileExists(newImagePath))) {
+      await addToGarbage(
+        newImagePath,
+        `New flash card image rolled back after failed update (flashCardId: ${id})`
+      );
     }
 
     return next(error);
@@ -191,59 +195,43 @@ exports.updateFlashCard = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Delete specific flash card
-// @route    PUT /api/v1/flashCard/:id
-// @access    Private
+// @route   DELETE /api/v1/flashCard/:id
+// @access  Private
 exports.deleteFlashCard = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
-  // Step 1: Start session & transaction
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // Step 2: Get flash card inside session
     const flashCard = await FlashCard.findById(id).session(session);
+    if (!flashCard) throw new ApiError(`No flash card for this id ${id}`, 404);
 
-    if (!flashCard) {
-      // Not found -> abort & return 404
-      await session.abortTransaction();
-      session.endSession();
-      return next(new ApiError(`No flash card for this id ${id}`, 404));
-    }
-
-    // Step 3: Delete the flash card document
+    // ✅ حذف الفلاش كارد من الـ DB
     await FlashCard.findByIdAndDelete(id).session(session);
 
-    // Step 4: If there is an image, attempt to delete the file from disk
+    // ✅ لو فيه صورة، نحطها في الـ Garbage بدل الحذف المباشر
     if (flashCard.image) {
       const oldImagePath = path.join(
         __dirname,
         `../../uploads/flashCards/${flashCard.image}`
       );
 
-      try {
-        await fs.promises.unlink(oldImagePath);
-      } catch (err) {
-        // File deletion failed -> abort & return 500
-        await session.abortTransaction();
-        session.endSession();
-        return next(
-          new ApiError(
-            "Flash card deletion failed because the image could not be deleted.",
-            500
-          )
+      const exists = await fileExists(oldImagePath);
+      if (exists) {
+        await addToGarbage(
+          oldImagePath,
+          `Flash card deleted (flashCardId: ${flashCard._id}, videoId: ${flashCard.videoId})`,
+          session
         );
       }
     }
 
-    // Step 5: Commit transaction and end session
     await session.commitTransaction();
     session.endSession();
 
-    // Step 6: Successful deletion -> 204 No Content
     res.status(204).send();
   } catch (error) {
-    // Step 7: On error -> abort & forward
     await session.abortTransaction();
     session.endSession();
     return next(error);

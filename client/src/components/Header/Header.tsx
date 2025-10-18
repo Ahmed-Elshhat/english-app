@@ -1,6 +1,8 @@
 import Link from "next/link";
 import "./Header.scss";
 import Image from "next/image";
+import { IoSettings } from "react-icons/io5";
+import { MdDashboardCustomize } from "react-icons/md";
 
 function Header() {
   return (
@@ -30,6 +32,14 @@ function Header() {
             </span>
 
             <ul>
+              <li>
+                <Link href="/dashboard">
+                  <span></span>
+                  <MdDashboardCustomize />
+                  Dashboard
+                  <span></span>
+                </Link>
+              </li>
               <li>
                 <Link href="/playlists/series">
                   playlists
@@ -83,6 +93,26 @@ function Header() {
       </div>
 
       <div className="right_side">
+        <nav>
+          <div className="links">
+            <span className="icon">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+
+            <ul>
+              <li>
+                <Link href="/dashboard">
+                  <span></span>
+                  <MdDashboardCustomize />
+                  Dashboard
+                  <span></span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </nav>
         <div className="points">5</div>
       </div>
     </header>

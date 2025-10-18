@@ -8,6 +8,7 @@ const Quiz = require("../models/quizModel");
 const factory = require("./handlersFactory");
 const ApiError = require("../utils/apiError");
 const { uploadSingleFile } = require("../middlewares/uploadImageMiddleware");
+const addToGarbage = require("../utils/addToGarbage");
 
 exports.uploadQuizImage = uploadSingleFile("image");
 
@@ -88,9 +89,19 @@ exports.getRandomQuizzes = asyncHandler(async (req, res) => {
   });
 });
 
+// دالة مساعدة بدل existsSync
+async function fileExists(filePath) {
+  try {
+    await fs.promises.access(filePath, fs.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // @desc    Update specific quiz
-// @route    PUT /api/v1/quizzes/:id
-// @access    Private
+// @route   PUT /api/v1/quizzes/:id
+// @access  Private
 exports.updateQuiz = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const newImage = req.body.image;
@@ -101,7 +112,7 @@ exports.updateQuiz = asyncHandler(async (req, res, next) => {
   let newImagePath = null;
 
   try {
-    // إذا فيه صورة جديدة، تحقق إنها موجودة على الـ disk
+    // ✅ تحقق من وجود الصورة الجديدة (async)
     if (newImage) {
       newImagePath = path.join(
         __dirname,
@@ -111,45 +122,39 @@ exports.updateQuiz = asyncHandler(async (req, res, next) => {
         "quizzes",
         newImage
       );
-      if (!fs.existsSync(newImagePath)) {
-        throw new ApiError("Uploaded image not found", 404);
-      }
+      const exists = await fileExists(newImagePath);
+      if (!exists) throw new ApiError("Uploaded image not found", 404);
     }
 
+    // ✅ جلب الكويز داخل session
     const quiz = await Quiz.findById(id).session(session);
-    if (!quiz) {
-      throw new ApiError("Quiz not found", 404);
-    }
+    if (!quiz) throw new ApiError("Quiz not found", 404);
 
-    // ==== validation for quizzes right answer is exist in answers characters ====
-
-    const rightAnswerIsExist = quiz.questions?.some((q) => {
+    // ✅ تحقق من صحة الأسئلة والإجابات
+    const rightAnswerInvalid = req.body.questions?.some((q) => {
       const chars = q.answers?.map((a) => a.character) || [];
       return !chars.includes(q.rightAnswer);
     });
 
-    if (rightAnswerIsExist) {
+    if (rightAnswerInvalid) {
       throw new ApiError(
         "Each quiz question must have its right answer included in the answers list.",
         400
       );
     }
 
-    // ==== validation for quizzes answers uniqueness ====
-
-    const hasDuplicateChars = quiz.questions?.some((q) => {
+    const hasDuplicateChars = req.body.questions?.some((q) => {
       const chars = q.answers?.map((a) => a.character) || [];
-      return new Set(chars).size !== chars.length; // لو في تكرار يرجع true
+      return new Set(chars).size !== chars.length;
     });
 
     if (hasDuplicateChars) {
       throw new ApiError("Duplicate characters found in quiz answers", 400);
     }
 
-    const videoId = req.body.videoId ? req.body.videoId : quiz.videoId;
-    const quizNumber = req.body.quizNumber
-      ? req.body.quizNumber
-      : quiz.quizNumber;
+    // ✅ تحقق من رقم الكويز وتكراره
+    const videoId = req.body.videoId || quiz.videoId;
+    const quizNumber = req.body.quizNumber || quiz.quizNumber;
 
     const duplicateQuiz = await Quiz.findOne({
       videoId,
@@ -163,44 +168,48 @@ exports.updateQuiz = asyncHandler(async (req, res, next) => {
         400
       );
 
-    // تحديث الفلاش كارد
+    // ✅ تحديث البيانات
     const quizUpdated = await Quiz.findByIdAndUpdate(id, req.body, {
       new: true,
       session,
     });
 
-    const oldImagePath = quiz.image
-      ? path.join(__dirname, "..", "..", "uploads", "quizzes", quiz.image)
-      : null;
+    // ✅ لو فيه صورة قديمة ومختلفة عن الجديدة نحطها في الـ Garbage
+    if (newImage && quiz.image !== newImage) {
+      const oldImagePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "uploads",
+        "quizzes",
+        quiz.image
+      );
+      const oldExists = await fileExists(oldImagePath);
 
-    // حذف الصورة القديمة إذا موجودة ومختلفة عن الجديدة
-    if (
-      oldImagePath &&
-      quiz.image !== newImage &&
-      fs.existsSync(oldImagePath)
-    ) {
-      await fs.promises.unlink(oldImagePath);
+      if (oldExists) {
+        await addToGarbage(
+          oldImagePath,
+          `Old quiz image replaced during update (quizId: ${quiz._id})`,
+          session
+        );
+      }
     }
 
-    // لو كل حاجة تمام، commit
+    // ✅ لو كل حاجة تمام
     await session.commitTransaction();
     session.endSession();
 
     res.status(200).json({ data: quizUpdated });
   } catch (error) {
-    // لو حصل أي خطأ قبل commit -> rollback DB
     await session.abortTransaction();
     session.endSession();
 
-    // لو فيه صورة جديدة تم رفعها على القرص، نحذفها
-    if (newImagePath && fs.existsSync(newImagePath)) {
-      try {
-        await fs.promises.unlink(newImagePath);
-      } catch (err) {
-        console.error(
-          `Failed to delete new image after rollback: ${err.message}`
-        );
-      }
+    // ⚠️ لو الصورة الجديدة اترفعت قبل الفشل → نحطها في Garbage
+    if (newImagePath && (await fileExists(newImagePath))) {
+      await addToGarbage(
+        newImagePath,
+        `New quiz image rolled back after failed update (quizId: ${id})`
+      );
     }
 
     return next(error);
@@ -208,59 +217,43 @@ exports.updateQuiz = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Delete specific quiz
-// @route    PUT /api/v1/quizzes/:id
-// @access    Private
+// @route   DELETE /api/v1/quizzes/:id
+// @access  Private
 exports.deleteQuiz = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
-  // Step 1: Start session & transaction
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // Step 2: Get quiz inside session
     const quiz = await Quiz.findById(id).session(session);
+    if (!quiz) throw new ApiError(`No quiz for this id ${id}`, 404);
 
-    if (!quiz) {
-      // Not found -> abort & return 404
-      await session.abortTransaction();
-      session.endSession();
-      return next(new ApiError(`No quiz for this id ${id}`, 404));
-    }
-
-    // Step 3: Delete the quiz document
+    // ✅ حذف الكويز من الـ DB
     await Quiz.findByIdAndDelete(id).session(session);
 
-    // Step 4: If there is an image, attempt to delete the file from disk
+    // ✅ لو فيه صورة، نحطها في الـ Garbage بدل الحذف المباشر
     if (quiz.image) {
       const oldImagePath = path.join(
         __dirname,
         `../../uploads/quizzes/${quiz.image}`
       );
 
-      try {
-        await fs.promises.unlink(oldImagePath);
-      } catch (err) {
-        // File deletion failed -> abort & return 500
-        await session.abortTransaction();
-        session.endSession();
-        return next(
-          new ApiError(
-            "Quiz deletion failed because the image could not be deleted.",
-            500
-          )
+      const exists = await fileExists(oldImagePath);
+      if (exists) {
+        await addToGarbage(
+          oldImagePath,
+          `Quiz deleted (quizId: ${quiz._id}, videoId: ${quiz.videoId})`,
+          session
         );
       }
     }
 
-    // Step 5: Commit transaction and end session
     await session.commitTransaction();
     session.endSession();
 
-    // Step 6: Successful deletion -> 204 No Content
     res.status(204).send();
   } catch (error) {
-    // Step 7: On error -> abort & forward
     await session.abortTransaction();
     session.endSession();
     return next(error);

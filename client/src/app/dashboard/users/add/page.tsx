@@ -1,14 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { IoClose } from "react-icons/io5";
 import { AxiosError } from "axios";
 import "./addUser.scss";
 import Loading from "@/components/Loading/Loading";
-import { Axios } from "@/Api/axios";
 import { USERS } from "@/Api/Api";
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { AxiosClient } from "@/Api/axiosClient";
 
 function AddUserPage() {
   const [form, setForm] = useState({
@@ -26,6 +25,7 @@ function AddUserPage() {
   const [flag, setFlag] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const axios = AxiosClient();
 
   useEffect(() => {
     validate();
@@ -140,7 +140,7 @@ function AddUserPage() {
     }
 
     try {
-      const res = await Axios.post(`${USERS}`, data, {
+      const res = await axios.post(`${USERS}`, data, {
         headers: { "Content-Type": "application/json" },
       });
 
